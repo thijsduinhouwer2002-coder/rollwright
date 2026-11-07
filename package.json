@@ -1,0 +1,28 @@
+{
+  "name": "rollwright",
+  "version": "0.2.0",
+  "description": "Dice notation, random tables and roll history for your notes.",
+  "private": true,
+  "license": "MIT",
+  "author": "Dortus",
+  "type": "module",
+  "scripts": {
+    "build": "tsc --noEmit && node esbuild.config.mjs",
+    "test": "vitest run",
+    "lint": "eslint .",
+    "lint:scanner": "eslint -c eslint.scanner.config.mjs ."
+  },
+  "devDependencies": {
+    "@codemirror/language": "^6.13.1",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.13",
+    "@types/node": "^26.6.6",
+    "esbuild": "^0.28.2",
+    "eslint": "^9.39.5",
+    "eslint-plugin-obsidianmd": "^0.5.1",
+    "obsidian": "^1.14.4",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.1",
+    "vitest": "^5.1.0"
+  }
+}
