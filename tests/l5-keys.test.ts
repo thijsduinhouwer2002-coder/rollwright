@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { ResultListeners } from "../src/result-listeners";
 // @ts-expect-error Vite reads this file as text; the project has no types for that.
 import readme from "../README.md?raw";
 import { processReadingView } from "../src/ui/reading-view";
@@ -25,7 +26,7 @@ describe("L5: dice codes without a known line", () => {
 	it("gives each table cell its own key", () => {
 		vi.stubGlobal("activeDocument", { createElement: fakeSpan });
 		const firstResult = vi.fn(async () => ({ kind: "dice", text: "1", formula: "1d6", details: "", flags: {} }));
-		const plugin = { rollContext: () => ({ aliases: {} }), hasResult: () => false, firstResult };
+		const plugin = { rollContext: () => ({ aliases: {} }), hasResult: () => false, firstResult, resultListeners: new ResultListeners() };
 		const ctx = { sourcePath: "A.md", getSectionInfo: () => null, addChild() {} };
 		processReadingView(plugin as never, fakeCell("1d6") as never, ctx as never);
 		processReadingView(plugin as never, fakeCell("1d6") as never, ctx as never);

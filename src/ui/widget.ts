@@ -114,8 +114,17 @@ export function mountRoll(plugin: RollwrightPlugin, target: HTMLElement, formula
 
 	let shown: RollOutcome | null = null;
 	const show = async (outcome: RollOutcome): Promise<void> => {
+		// The listener below and the click itself both hand over the same result: draw it once.
+		if (outcome === shown) return;
 		shown = outcome;
 		await showOutcome(plugin, target, outcome, sourcePath, component);
+	};
+	// A click hands back its result only after the history is saved. When two clicks come back in
+	// reverse order, the older one must not cover the newer one, which the listener already drew.
+	const showIfNewest = async (outcome: RollOutcome): Promise<void> => {
+		const newest = plugin.latestResult(key);
+		if (newest !== undefined && newest !== outcome) return;
+		await show(outcome);
 	};
 	const fail = (error: unknown): void => {
 		shown = null;
@@ -125,7 +134,7 @@ export function mountRoll(plugin: RollwrightPlugin, target: HTMLElement, formula
 	const rerollNow = async (): Promise<void> => {
 		try {
 			if (!modify) {
-				await show(await plugin.freshResult(key, formula, sourcePath, keep));
+				await showIfNewest(await plugin.freshResult(key, formula, sourcePath, keep));
 				return;
 			}
 			// dice-mod: write what is shown. Hidden by |none, it is rolled and shown first.
@@ -138,7 +147,7 @@ export function mountRoll(plugin: RollwrightPlugin, target: HTMLElement, formula
 
 	const averageNow = async (): Promise<void> => {
 		try {
-			await show(await plugin.averageResult(key, formula, sourcePath, keep));
+			await showIfNewest(await plugin.averageResult(key, formula, sourcePath, keep));
 		} catch (error) {
 			fail(error);
 		}
@@ -189,6 +198,9 @@ export function mountRoll(plugin: RollwrightPlugin, target: HTMLElement, formula
 	});
 	// Keep the editor from moving the cursor into the code on a click.
 	target.addEventListener("mousedown", (event) => event.preventDefault());
+
+	// A new result for this place from another view (or this one) shows here too.
+	component.register(plugin.resultListeners.on(key, (outcome) => void show(outcome)));
 
 	if (hideFirst && !plugin.hasResult(key, keep)) {
 		showBlank(target, formula);

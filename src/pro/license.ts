@@ -47,7 +47,7 @@ export type LicenseOutcome = "valid" | "invalid" | "our-error" | "no-connection"
 export const LICENSE_MESSAGES: Record<Exclude<LicenseOutcome, "valid">, string> = {
 	invalid: "This key is not valid. If you rotated it, paste the new key from your Polar purchases.",
 	"no-connection": "Could not reach Polar, try again.",
-	"our-error": "Something is wrong on our side, please contact support@dortus.com.",
+	"our-error": "Something is wrong on our side, please contact thijs@dortus.com.",
 };
 
 export interface PolarIds {

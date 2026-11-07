@@ -7,9 +7,15 @@ import { findInlineDice } from "../rollers/inline";
 import { editorModifier } from "./dice-mod";
 import { mountRoll } from "./widget";
 
-class RollWidget extends WidgetType {
-	private component: Component | null = null;
+/**
+ * The component of each drawn widget, by its DOM element. Not on the widget: when a rebuilt
+ * widget is `eq` to the old one, CodeMirror keeps the old DOM, gives it to the new widget (which
+ * never ran toDOM) and later calls destroy(dom) on that new widget. Kept on the widget, the old
+ * component was never unloaded and its listeners stayed behind.
+ */
+const components = new WeakMap<HTMLElement, Component>();
 
+class RollWidget extends WidgetType {
 	constructor(
 		private readonly plugin: RollwrightPlugin,
 		private readonly formula: string,
@@ -31,17 +37,18 @@ class RollWidget extends WidgetType {
 
 	toDOM(view: EditorView): HTMLElement {
 		const span = activeDocument.createElement("span");
-		this.component = new Component();
-		this.component.load();
+		const component = new Component();
+		component.load();
+		components.set(span, component);
 		// dice-mod: writes only into this editor's own note, through the view, so undo works.
 		const modify = this.modify ? editorModifier(this.plugin, view, span, this.formula, this.line, this.index) : undefined;
-		mountRoll(this.plugin, span, this.formula, this.key, this.sourcePath, this.component, this.keep, modify);
+		mountRoll(this.plugin, span, this.formula, this.key, this.sourcePath, component, this.keep, modify);
 		return span;
 	}
 
-	destroy(): void {
-		this.component?.unload();
-		this.component = null;
+	destroy(dom: HTMLElement): void {
+		components.get(dom)?.unload();
+		components.delete(dom);
 	}
 
 	ignoreEvent(): boolean {

@@ -1,18 +1,53 @@
 # Rollwright
 
-Roll dice inside your notes. Write a formula in inline code, read the result, click to roll again. Rollwright also draws from tables, lists, sections, lines and tags, and it keeps a history that shows which note each roll came from.
+Roll dice and random tables right inside your notes. Write a formula, read the result, click to roll again.
 
-Rollwright is at version 0.2.0. Before each release, automated tests run it in the real Obsidian app, in reading view and Live Preview.
+![A session note in Live Preview: the Perception line shows the code you type, dice: 1d20 + 4|text(Perception), and the lines around it show rolled results: trap damage, an encounter, the weather, loot and a line from the toll keeper](https://raw.githubusercontent.com/thijsduinhouwer2002-coder/rollwright/main/images/live-preview.png)
 
-## Rolling dice
+Made by Thijs at [Dortus](https://dortus.com) for game masters and solo players who keep their sessions in Obsidian. It uses the `dice:` notation known from the Dice Roller plugin.
+
+## What you can do
+
+- **Roll dice in a sentence.** `` `dice: 1d20 + 4` `` becomes a result you can click to roll again. Supports keep highest, exploding, rerolls, success counting, Fudge and narrative dice.
+- **Roll on your own notes.** Pick a random row from a table, an item from a list, a block from a note, a line, or a note with a tag.
+- **Lookup tables.** Put a formula in the first header and Rollwright picks the matching row. Cells can hold rolls too.
+- **Keep or write a result.** `dice+:` keeps a result after a restart, `dice-mod:` writes it into the note after you confirm.
+- **Roll history.** A side panel shows what you rolled, from which note, and lets you roll again.
+- **Works where you write.** Reading view and Live Preview look the same, in light and dark themes.
+
+![The roll history panel next to the note, with each roll, its formula or source table, and its source note](https://raw.githubusercontent.com/thijsduinhouwer2002-coder/rollwright/main/images/roll-history.png)
+
+## Quick start
+
+1. Install Rollwright from Community plugins and turn it on.
+2. In any note, type `` `dice: 2d6 + 3` `` (with the backticks).
+3. Switch to reading view or move the cursor away. Click the result to roll again.
+
+For a table, give it a block id such as `^loot` and write `` `dice: [[Treasure^loot]]` ``.
+
+All rolling is free. Two extra looks, Parchment and Arcane, are a one-time $6 purchase (see [Paid skins](#paid-skins)).
+
+## Full reference
+
+Everything below is detail for when you need it. Rollwright is at version 0.2.0. Before each release, automated tests run it in the real Obsidian app, in reading view and Live Preview.
+
+### Rolling dice
 
 Write `` `dice: 2d6 + 3` `` in a note. It works in reading view and Live Preview. Hover to see the formula and the dice. Click to roll again. A result stays while you scroll or type elsewhere in the note. It is rolled again when you click, after a restart, and when lines above it are added or removed, because a result is tied to its line. A roll in a table cell can also roll again when the note is drawn again.
 
+#### Keep a result
+
 To keep a result after a restart, write `` `dice+: 2d6` ``. Rollwright saves it in its own plugin data, for that note and that place in it. A click rolls again and keeps the new result. Up to 500 kept results are saved; beyond that the oldest is dropped. `` `dice-: 2d6` `` never keeps a result and works like `dice:`. When Rollwright cannot tell which line a code is on, as can happen in a table cell of the note itself, `dice+:` works like `dice:` and keeps nothing. Inside a cell of a table you roll on, or as a lookup table header, `dice+:` and `dice-:` roll like `dice:`: the result is kept, or not, as part of the outer roll. Inside such a cell or header, `dice-mod:` is not rolled and stays as text.
+
+#### Write a result into the note
 
 To write a roll into the note for good, use `` `dice-mod: 3d100 + 12` ``. It shows a roll like `dice:`. A click, or Enter, does not roll again: it asks first and shows the text that goes in. Replace turns the code, backticks included, into the result you see, as in `3d100 + 12 -> [75, 20, 75] + 12 -> 182`. A setting leaves out the formula: `[75, 20, 75] + 12 -> 182`. The total follows the number flags; labels such as `|text(x)` are not written. A roll on a table, list, note or tag writes only its result, on one line, and that other note is never changed. Characters that would change the line get a backslash, such as a backtick, a `|` in a table row, or a `#` or `-` at the start of a line. Rollwright only writes into the note that holds the code. It refuses inside an embedded note and when it cannot tell which line the code is on, as can happen in a table cell; then it says so and changes nothing. In Live Preview, undo takes the change back. In reading view the file is changed directly, and undo may not take that back, so check the window before you choose Replace.
 
+#### Clicks with Ctrl or Alt
+
 Ctrl-click (Cmd-click on a Mac) on a result from a table, list, section, line or tag opens the note it came from, in a new tab, without rolling. A tag roll over several notes has no single note to open, so it only says so. On a dice roll, Ctrl-click rolls again like a plain click. Alt-click (Option-click on a Mac) on a dice roll shows its average, as `|avg` does; it is not added to the history. Ctrl-click on a code with `|none` hides its result again and forgets it, also for `dice+:`. On `dice-mod:`, Ctrl-click opens the source of a table or section result; any other click opens the replace window. Phones have no Ctrl or Alt key, so there only a plain tap works.
+
+#### Dice notation
 
 | You write | What it does |
 |---|---|
@@ -27,7 +62,7 @@ Ctrl-click (Cmd-click on a Mac) on a result from a table, list, section, line or
 | `(1d4)d6` | Roll for the number of dice first |
 | `3g2d`, `2y1c1b`, `1w` | Narrative dice of Genesys and the Star Wars roleplaying games: Ability `g`/`a`, Proficiency `y`/`pro`, Difficulty `d`/`diff`, Challenge `r`/`c`, Boost `b`/`boo`, Setback `s`/`sb`/`blk`, Force `w`/`f`, capitals the same. `p` is Proficiency when the roll also has an `a`, `c` or `d` die, otherwise it asks you to write `y` or `d`. Success cancels Failure and Advantage cancels Threat; Triumph also counts as a Success and Despair as a Failure. The result reads like `2 Success, 1 Threat`, the tooltip shows each die. Only when the whole formula is narrative dice and cannot be read as ordinary dice: `2d`, `d`, `4dF` and `1D6KH1` stay ordinary dice, as do saved formulas and note fields such as `gp`. No average with `\|avg` |
 
-### Modifiers
+#### Modifiers
 
 Modifiers run from left to right. A number is optional and defaults to 1.
 
@@ -44,13 +79,13 @@ Modifiers run from left to right. A number is optional and defaults to 1.
 
 `!` explodes on the highest face and `r` rerolls the lowest, unless you add conditions: `1d4!=3`, `1d4!i=!3`, `1d4r<3`, `1d4r<2>3`. Conditions right after `!` or `r` belong to that modifier.
 
-### Counting successes
+#### Counting successes
 
 A condition on dice turns each die into a score: 1 if it matches, otherwise 0. The result is the sum.
 
 `=`, `=!` (not equal), `>`, `<`, `>=`, `<=`, and `-=` or `=-` to score -1. Example: `5d10>=8-=1`. The first matching condition counts. The threshold can be dice too: `3d6>1d6`.
 
-### Flags
+#### Flags
 
 Add flags after `|`, as in `1d20 + 2|nodice|text(Dexterity +2)`.
 
@@ -71,7 +106,7 @@ Add flags after `|`, as in `1d20 + 2|nodice|text(Dexterity +2)`.
 
 The number flags only change dice results, not picks from tables, lists or notes, and only what is shown: the tooltip still shows the exact roll. When two of them clash, the last one counts, so `|round|noround` does not round. A table column with the same name as a flag, such as Round, still wins.
 
-## Rolling on your notes
+### Rolling on your notes
 
 | You write | What it does |
 |---|---|
@@ -91,7 +126,7 @@ The forms `[[Note#^id]]` and `[text](Note#^id)` also work.
 
 A roll inside a block or section you draw is not rolled again: it shows as plain code. An embedded note in such a result becomes a link. Embedded images stay.
 
-### Lookup tables
+#### Lookup tables
 
 If the first header is a formula, Rollwright rolls it and finds the matching row. Rows can be written as `1-2`, `11`, `13,14` or `51–60`. A cell may hold another roll, such as `` `dice: 2d6` `` or `dice: [[Note^id]]`.
 
@@ -104,7 +139,7 @@ If the first header is a formula, Rollwright rolls it and finds the matching row
 ^weather
 ```
 
-## Side panel, commands and settings
+### Side panel, commands and settings
 
 - **Roll history** shows rolls you clicked or typed, with the source note, and lets you roll again. Rolls that happen by themselves when a note opens are not listed. The history is stored in the plugin's data file.
 - **Commands:** "Open roll history" and "Roll a formula".
@@ -128,6 +163,10 @@ Rollwright has no telemetry and needs no account. Its only network connection is
 ## Limits
 
 Up to 1000 dice per group, 10000 dice per formula, 1000000 sides, and 100 repeats per die for `!` and `r`. One roll, nesting included, can use up to 10000 picks from notes. Beyond that you get a message. A broken formula is underlined and the tooltip gives the reason.
+
+## Support
+
+Questions, ideas or a bug? Open an issue on [GitHub](https://github.com/thijsduinhouwer2002-coder/rollwright/issues) or write to thijs@dortus.com.
 
 ## Development
 

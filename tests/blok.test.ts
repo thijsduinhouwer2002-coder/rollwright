@@ -100,7 +100,7 @@ function outcome(text: string, details = ""): RollOutcome {
 
 function mount(plugin: RollwrightPlugin, formula: string) {
 	const span = new FakeEl();
-	mountRoll(plugin, span as never, formula, "k", "A.md", {} as never);
+	mountRoll(plugin, span as never, formula, "k", "A.md", { register() {} } as never);
 	return span;
 }
 

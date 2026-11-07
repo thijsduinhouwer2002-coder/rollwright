@@ -69,7 +69,7 @@ async function load() {
 
 function mount(plugin: RollwrightPlugin, formula: string, key = "k", keep = false, modify?: () => void) {
 	const span = fakeSpan();
-	mountRoll(plugin, span as never, formula, key, "A.md", {} as never, keep, modify);
+	mountRoll(plugin, span as never, formula, key, "A.md", { register() {} } as never, keep, modify);
 	return span;
 }
 

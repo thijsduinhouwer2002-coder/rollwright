@@ -4,6 +4,7 @@ import { activateLicense, isLicenseActive, obsidianRequest, paymentReady, POLAR_
 import { resolveSkin, SKINS } from "./pro/skins";
 import { fieldNames } from "./rollers/fields";
 import { replaceCodeInNote } from "./rollers/modify";
+import { ResultListeners } from "./result-listeners";
 import { rollSpec, type NoteData, type RollContext, type RollOutcome } from "./rollers/run";
 import { CHANGED_NOTICE, NOT_MARKDOWN_NOTICE, ReplaceCodeModal } from "./ui/dice-mod";
 import { HISTORY_VIEW, RollHistoryView } from "./ui/history-view";
@@ -72,6 +73,8 @@ export default class RollwrightPlugin extends Plugin {
 	private readonly results = new Map<string, RollOutcome>();
 	/** First rolls still on their way (a table reads a note first), so a second view of the same code waits for it. */
 	private readonly pending = new Map<string, Promise<RollOutcome>>();
+	/** Widgets per key, told about every new result so all views of a place show the same. */
+	readonly resultListeners = new ResultListeners();
 	/** Results of `dice+:`, written to disk with the settings. */
 	private readonly kept = new Map<string, RollOutcome>();
 	private readonly skinnedDocuments = new Set<Document>();
@@ -209,6 +212,11 @@ export default class RollwrightPlugin extends Plugin {
 		return notes;
 	}
 
+	/** The newest result remembered for a place, if any. */
+	latestResult(key: string): RollOutcome | undefined {
+		return this.results.get(key);
+	}
+
 	hasResult(key: string, keep = false): boolean {
 		return this.results.has(key) || (keep && this.kept.has(key));
 	}
@@ -301,6 +309,7 @@ export default class RollwrightPlugin extends Plugin {
 			if (oldest !== undefined) this.results.delete(oldest);
 		}
 		this.results.set(key, outcome);
+		this.resultListeners.emit(key, outcome);
 	}
 
 	private async addToHistory(outcome: RollOutcome, formula: string, sourcePath: string): Promise<void> {

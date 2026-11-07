@@ -206,7 +206,7 @@ describe("4: errors on activate and on the quiet check", () => {
 		const { plugin } = await load({ request: fakeRequest({ status: 422, json: { detail: [] } }) });
 		expect(await plugin.activateLicense("KEY-1")).toBe("our-error");
 		expect(plugin.isLicensed).toBe(false);
-		expect(LICENSE_MESSAGES["our-error"]).toBe("Something is wrong on our side, please contact support@dortus.com.");
+		expect(LICENSE_MESSAGES["our-error"]).toBe("Something is wrong on our side, please contact thijs@dortus.com.");
 	});
 
 	it("the settings show the message after a failed Activate", async () => {

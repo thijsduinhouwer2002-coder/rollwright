@@ -195,8 +195,11 @@ export class Setting {
 		return this;
 	}
 }
-export class Component {}
-export class MarkdownRenderChild {}
+export class Component {
+	// Real Obsidian calls these when the component unloads; the stub only has to accept them.
+	register(_callback: () => void): void {}
+}
+export class MarkdownRenderChild extends Component {}
 export const rendered: string[] = [];
 export const MarkdownRenderer = {
 	render: async (_app: unknown, markdown: string): Promise<void> => {

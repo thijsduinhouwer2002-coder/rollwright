@@ -54,7 +54,7 @@ describe("narrative dice in the widget (fake Obsidian)", () => {
 	it("shows the text, a click rolls again, Alt-click gives the message without crashing", async () => {
 		const plugin = await load();
 		const span = fakeSpan();
-		mountRoll(plugin, span as never, "3g4d", "k", "A.md", {} as never);
+		mountRoll(plugin, span as never, "3g4d", "k", "A.md", { register() {} } as never);
 		await wait();
 		expect(span.text).toMatch(SUMMARY);
 		span.listeners.click?.(press());
@@ -69,7 +69,7 @@ describe("narrative dice in the widget (fake Obsidian)", () => {
 	it("an ambiguous p shows the message in the widget", async () => {
 		const plugin = await load();
 		const span = fakeSpan();
-		mountRoll(plugin, span as never, "3g2p", "k", "A.md", {} as never);
+		mountRoll(plugin, span as never, "3g2p", "k", "A.md", { register() {} } as never);
 		await wait();
 		expect(span.error).toContain("P is ambiguous");
 	});

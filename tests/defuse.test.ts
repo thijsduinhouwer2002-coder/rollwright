@@ -4,6 +4,7 @@ import { defuseRolls } from "../src/rollers/defuse";
 import { findInlineDice, formulaFromCode } from "../src/rollers/inline";
 import { rollSpec, type RollContext } from "../src/rollers/run";
 import { processReadingView } from "../src/ui/reading-view";
+import { ResultListeners } from "../src/result-listeners";
 import { mountRoll } from "../src/ui/widget";
 import { rendered } from "./obsidian-stub";
 
@@ -75,8 +76,9 @@ describe("rolled text cannot roll again", () => {
 			rollContext: () => ({ aliases: {} }),
 			hasResult: () => false,
 			firstResult: () => rollSpec("[[Self]]", context({ Self: "`dice: [[Self]]`" })),
+			resultListeners: new ResultListeners(),
 		};
-		mountRoll(plugin as never, fakeTarget(), "[[Self]]", "k", "Self.md", {} as never);
+		mountRoll(plugin as never, fakeTarget(), "[[Self]]", "k", "Self.md", { register() {} } as never);
 		await vi.waitFor(() => expect(rendered).toHaveLength(1));
 		expect(rollableCodes(rendered[0] as string)).toEqual([]);
 	});
