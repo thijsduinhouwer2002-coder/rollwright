@@ -685,7 +685,8 @@ button.rollwright-history-clear:not(.clickable-icon) {
 }
 
 /* Alleen voor schermlezers: de komma tussen getal en stempel. */
-.rollwright-history-sep {
+.rollwright-history-sep,
+.rollwright-sep {
 	position: absolute;
 	width: 1px;
 	height: 1px;

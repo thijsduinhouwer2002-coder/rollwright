@@ -1,0 +1,303 @@
+/* Results in notes */
+.rollwright-roll {
+	cursor: pointer;
+	display: inline-flex;
+	align-items: baseline;
+	gap: 0.25em;
+	padding: 0 0.35em;
+	border-radius: var(--radius-s);
+	background: var(--rollwright-bg);
+	color: var(--rollwright-fg);
+	border: 1px solid var(--rollwright-border);
+	font-weight: var(--font-semibold);
+}
+
+.rollwright-roll:hover {
+	border-color: var(--rollwright-accent);
+}
+
+.rollwright-icon {
+	display: inline-flex;
+	align-self: center;
+	color: var(--rollwright-accent);
+}
+
+.rollwright-icon svg {
+	width: 0.9em;
+	height: 0.9em;
+}
+
+.rollwright-label {
+	font-weight: var(--font-normal);
+}
+
+/* Live Preview: .cm-line has white-space: pre-wrap, so the space after "Hit:" stayed next to the gap of
+   the token and showed double ("Hit:  9"). With normal it falls away at the end of the item, as in reading. */
+.cm-line .rollwright-roll .rollwright-label {
+	white-space: normal;
+}
+
+.rollwright-value p {
+	display: inline;
+	margin: 0;
+}
+
+/* A result of more than one line or a block (heading, list, quote, table): a block of its own under
+   the line, same border and background, plain text size, no list bullets. widget.ts sets the class. */
+.rollwright-roll.rollwright-roll-block {
+	display: flex;
+	align-items: flex-start;
+	box-sizing: border-box;
+	width: 100%;
+	margin: var(--size-4-1) 0;
+	padding: var(--size-4-1) var(--size-4-2);
+	border-radius: var(--radius-m);
+	font-weight: var(--font-normal);
+	/* Live Preview puts the widget in a .cm-line with white-space: pre-wrap. The rendered markdown has
+	   newlines between its elements (after <br>, between <li>), which then show as empty lines. */
+	white-space: normal;
+}
+
+/* In Live Preview zet CodeMirror na de widget nog een leeg img.cm-widgetBuffer in dezelfde .cm-line.
+   Na een blok (display: flex) komt dat op een eigen regel, een lege regel onder het blok. Als
+   inline-flex net iets smaller dan de regel past de buffer (0 breed) ernaast en is er geen extra
+   regel. Lezen blijft flex. */
+.cm-line .rollwright-roll.rollwright-roll-block {
+	display: inline-flex;
+	width: calc(100% - 2px);
+	vertical-align: top;
+}
+
+.rollwright-roll-block .rollwright-icon {
+	align-self: flex-start;
+	margin-top: 0.3em;
+}
+
+.rollwright-roll-block .rollwright-value {
+	display: block;
+	flex: 1;
+	min-width: 0;
+}
+
+.rollwright-roll-block .rollwright-value :is(p, h1, h2, h3, h4, h5, h6, ul, ol, li, blockquote, pre) {
+	display: block;
+	margin: 0;
+	padding: 0;
+}
+
+.rollwright-roll-block .rollwright-value :is(p, h1, h2, h3, h4, h5, h6, ul, ol, blockquote, pre, table) + * {
+	margin-top: var(--size-4-1);
+}
+
+.rollwright-roll.rollwright-roll-block .rollwright-value :is(h1, h2, h3, h4, h5, h6) {
+	font-size: inherit;
+	font-family: inherit;
+	font-variant: inherit;
+	letter-spacing: inherit;
+	line-height: inherit;
+	color: inherit;
+	font-weight: var(--font-bold);
+	border: 0;
+}
+
+.rollwright-roll.rollwright-roll-block .rollwright-value :is(ul, ol, li) {
+	list-style: none;
+}
+
+.rollwright-roll-block .rollwright-value li::marker {
+	content: none;
+}
+
+.rollwright-roll-block .rollwright-value li :is(ul, ol) {
+	padding-inline-start: 1em;
+}
+
+.rollwright-roll-block .rollwright-value :is(.list-bullet, .list-collapse-indicator, .heading-collapse-indicator) {
+	display: none;
+}
+
+.rollwright-roll-block .rollwright-value blockquote {
+	padding-inline-start: var(--size-4-2);
+	border-inline-start: 2px solid var(--rollwright-border);
+}
+
+.rollwright-roll-block .rollwright-value table {
+	margin: 0;
+}
+
+.rollwright-error {
+	color: var(--text-error);
+	background: transparent;
+	border: 0;
+	font-weight: var(--font-normal);
+	text-decoration: underline wavy var(--text-error);
+}
+
+/* Free skin */
+body.rollwright-skin-classic,
+.rollwright-skin-preview-tile.rollwright-skin-classic {
+	--rollwright-bg: var(--background-secondary);
+	--rollwright-fg: var(--text-normal);
+	--rollwright-border: var(--background-modifier-border);
+	--rollwright-accent: var(--interactive-accent);
+}
+
+/* Paid skins */
+body.rollwright-skin-parchment,
+.rollwright-skin-preview-tile.rollwright-skin-parchment {
+	--rollwright-bg: #efe2c0;
+	--rollwright-fg: #3f2d17;
+	--rollwright-border: #b89b63;
+	--rollwright-accent: #8c2f1b;
+}
+
+body.rollwright-skin-parchment .rollwright-roll,
+.rollwright-skin-preview-tile.rollwright-skin-parchment .rollwright-roll {
+	font-family: Georgia, "Times New Roman", serif;
+}
+
+/* Parchment in a dark theme: dark parchment instead of a bright beige sticker (Daan point 5). */
+body.theme-dark.rollwright-skin-parchment,
+body.theme-dark .rollwright-skin-preview-tile.rollwright-skin-parchment {
+	--rollwright-bg: #3a2f1e;
+	--rollwright-fg: #f0e2c0;
+	--rollwright-border: #8a6d3b;
+	--rollwright-accent: #e0a060;
+}
+
+/* An error looks the same in every skin: the normal font, not the serif of Parchment (Daan point 8). */
+body.rollwright-skin-parchment .rollwright-roll.rollwright-error {
+	font-family: inherit;
+}
+
+body.rollwright-skin-arcane,
+.rollwright-skin-preview-tile.rollwright-skin-arcane {
+	--rollwright-bg: #1f1838;
+	--rollwright-fg: #e9e2ff;
+	--rollwright-border: #6a4fc9;
+	--rollwright-accent: #5fd6e8;
+}
+
+body.rollwright-skin-arcane .rollwright-roll:hover {
+	box-shadow: 0 0 0.4em var(--rollwright-accent);
+}
+
+/* Skin preview in the settings: every tile carries the class of its skin, so it looks like that skin
+   whatever skin the body has. */
+.rollwright-skin-preview {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--size-4-2);
+	margin-top: var(--size-4-1);
+}
+
+.rollwright-skin-preview-tile {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--size-4-1);
+	min-width: 6em;
+	padding: var(--size-4-2) var(--size-4-3);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-m);
+	background: var(--background-primary);
+}
+
+/* The preview only shows: no hover, no pointer, and the serif font of Parchment stays on its own tile. */
+.rollwright-skin-preview-tile .rollwright-skin-preview-roll {
+	cursor: default;
+	pointer-events: none;
+}
+
+.rollwright-skin-preview-tile:not(.rollwright-skin-parchment) .rollwright-roll {
+	font-family: inherit;
+}
+
+.rollwright-skin-preview-name {
+	display: flex;
+	align-items: center;
+	gap: 0.3em;
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+}
+
+/* Klus 7 (Daan, ontwerp-v2): every tile shows a crit with its NAT 20 sticker and a small ordinary roll.
+   The padding keeps room for the sticker, which sits half outside the top right corner of the token. */
+.rollwright-skin-preview-rolls {
+	display: flex;
+	align-items: center;
+	gap: 1em;
+	padding: 0.8em 0.9em 0 0;
+}
+
+.rollwright-skin-preview-small {
+	font-size: 0.8em;
+}
+
+.rollwright-skin-preview-lock {
+	display: inline-flex;
+	color: var(--text-faint);
+}
+
+.rollwright-skin-preview-lock svg {
+	width: var(--icon-xs);
+	height: var(--icon-xs);
+}
+
+/* Side panel */
+.rollwright-history-form {
+	display: flex;
+	gap: var(--size-4-2);
+	margin-bottom: var(--size-4-2);
+}
+
+.rollwright-history-form input {
+	flex: 1;
+	min-width: 0;
+}
+
+.rollwright-history-saved {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--size-4-1);
+	margin-bottom: var(--size-4-2);
+}
+
+.rollwright-history-clear {
+	margin-bottom: var(--size-4-2);
+}
+
+.rollwright-history-empty {
+	color: var(--text-muted);
+}
+
+.rollwright-history-item {
+	padding: var(--size-4-2) 0;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+.rollwright-history-result {
+	font-weight: var(--font-semibold);
+	white-space: pre-wrap;
+}
+
+.rollwright-history-name {
+	font-size: var(--font-ui-smaller);
+	overflow-wrap: anywhere;
+}
+
+.rollwright-history-formula,
+.rollwright-history-details,
+.rollwright-history-meta {
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+	overflow-wrap: anywhere;
+}
+
+.rollwright-history-meta {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: var(--size-4-2);
+}
+

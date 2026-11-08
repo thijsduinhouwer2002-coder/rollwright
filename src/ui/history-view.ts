@@ -42,10 +42,20 @@ export class RollHistoryView extends ItemView {
 		return file?.extension === "md" ? file.path : "";
 	}
 
+	/**
+	 * The note "Roll again" on an old log item rolls in: the note it came from (its frontmatter counts),
+	 * as long as that note still exists; otherwise the open note. Answer of Daan, beoordeling 9.
+	 */
+	private sourceFor(entry: HistoryEntry): string {
+		const source = entry.source ?? "";
+		if (source !== "" && this.app?.vault?.getFileByPath?.(source)) return source;
+		return this.panelSource();
+	}
+
 	/** A roll from the panel: it goes into the log (freshResult does that) and also shows as a notice. */
-	private async rollAndNotify(formula: string): Promise<void> {
+	private async rollAndNotify(formula: string, source = this.panelSource()): Promise<void> {
 		try {
-			const outcome = await this.plugin.freshResult(null, formula, this.panelSource());
+			const outcome = await this.plugin.freshResult(null, formula, source);
 			new Notice(`${formula}: ${outcome.text}`);
 		} catch (error) {
 			new Notice(error instanceof Error ? error.message : String(error));
@@ -137,16 +147,23 @@ export class RollHistoryView extends ItemView {
 		}
 		const label = historyLabel(entry.formula);
 		if (label.name !== "") item.createDiv({ cls: "rollwright-history-name", text: label.name });
-		// The tidy text is only for showing; the raw formula stays in the title so nothing is lost.
-		const formula = item.createDiv({ cls: "rollwright-history-formula", text: label.formula });
-		formula.setAttribute("title", entry.formula);
-		if (entry.details !== "") item.createDiv({ cls: "rollwright-history-details", text: entry.details });
+		// A fixed value (dice: 7) would say 7 three times: formula and working only when they add something (klus 11).
+		const result = String(entry.result ?? "").trim();
+		if (label.formula.trim() !== result) {
+			// The tidy text is only for showing; the raw formula stays in the title so nothing is lost.
+			const formula = item.createDiv({ cls: "rollwright-history-formula", text: label.formula });
+			formula.setAttribute("title", entry.formula);
+		}
+		const details = String(entry.details ?? "").trim();
+		if (details !== "" && details !== result && details !== label.formula.trim()) {
+			item.createDiv({ cls: "rollwright-history-details", text: entry.details });
+		}
 		const meta = item.createDiv({ cls: "rollwright-history-meta" });
 		// Hours and minutes only; the note is in the heading above, so the card does not say it again (klus 9c).
 		meta.createSpan({ cls: "rollwright-history-time", text: shortTime(entry.time) });
 		const again = meta.createEl("button", { cls: "clickable-icon" });
 		again.setAttribute("aria-label", "Roll again");
 		setIcon(again, "refresh-cw");
-		again.addEventListener("click", () => void this.rollAndNotify(entry.formula));
+		again.addEventListener("click", () => void this.rollAndNotify(entry.formula, this.sourceFor(entry)));
 	}
 }

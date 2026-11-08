@@ -22,6 +22,8 @@ export const CRIT_CLASS = "rollwright-crit";
 export const FUMBLE_CLASS = "rollwright-fumble";
 /** The small "NAT 20", "NAT 1", "MAX" or "MIN" on a crit or fumble. */
 export const STAMP_CLASS = "rollwright-stamp";
+/** A comma only screen readers hear, between a result and its stamp. */
+export const SEP_CLASS = "rollwright-sep";
 /** On a result from a table, list, section, line or tag: text, not a number. */
 export const TEXT_CLASS = "rollwright-text";
 
@@ -195,7 +197,11 @@ async function showOutcome(plugin: RollwrightPlugin, target: HTMLElement, outcom
 		// A kept result of an older version has no extreme: then nothing is added.
 		if (!holdExtreme) for (const cls of extremeClasses(outcome.extreme)) target.addClass(cls);
 		// The stamp is there at once (for reading and the history); styles.css lets it grow only after the landing.
-		if (outcome.extreme !== undefined) target.createSpan({ cls: STAMP_CLASS, text: outcome.stamp ?? stampText(outcome.formula, outcome.extreme) });
+		if (outcome.extreme !== undefined) {
+			// Hidden comma, as in the log: a screen reader says "20, NAT 20" and not "20NAT 20".
+			target.createSpan({ cls: SEP_CLASS, text: ", " });
+			target.createSpan({ cls: STAMP_CLASS, text: outcome.stamp ?? stampText(outcome.formula, outcome.extreme) });
+		}
 	} else {
 		target.addClass(TEXT_CLASS);
 		await MarkdownRenderer.render(plugin.app, defuseRolls(outcome.text), value, sourcePath, component);

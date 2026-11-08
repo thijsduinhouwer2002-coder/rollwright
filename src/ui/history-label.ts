@@ -39,14 +39,16 @@ function targetText(target: Target, raw: string): string {
  * "Roll again" still uses it. Never throws; on anything it cannot read it gives the raw text back.
  */
 export function historyLabel(formula: string): HistoryLabel {
-	const raw = typeof formula === "string" ? formula : String(formula ?? "");
+	const given = typeof formula === "string" ? formula : String(formula ?? "");
+	// A formula pasted or saved with its prefix ("dice: 1d6", "dice-mod: ...") shows without it.
+	const raw = given.replace(/^\s*dice(?:\+|-|-mod)?:\s*/i, "");
 	try {
 		const spec = parseSpec(raw);
 		const shown = targetText(spec.target, raw);
-		if (shown === "") return { name: "", formula: raw };
+		if (shown === "") return { name: "", formula: given };
 		return { name: (spec.flags.text ?? "").trim(), formula: shown };
 	} catch {
-		return { name: "", formula: raw };
+		return { name: "", formula: given };
 	}
 }
 

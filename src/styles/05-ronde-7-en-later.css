@@ -1,0 +1,194 @@
+/* Ronde 7 (Daan, 8 nov): de stempel in de tekst wordt een sticker op de rechterbovenhoek van het
+   token. Hij staat los van de regel (position: absolute), dus het token wordt bij het landen niet
+   breder en de regel springt niet meer (ronde 6, v2-47 tegen v2-48). Volle kleur met een randje in
+   de kleur van de pagina, iets scheef: het leest als een sticker die erop geplakt wordt.
+   In het logboek blijft de stempel naast het getal staan (die regels gelden alleen voor het token). */
+.rollwright-roll {
+	position: relative;
+}
+
+.rollwright-roll > .rollwright-stamp,
+.rollwright-roll.rollwright-crit > .rollwright-stamp,
+.rollwright-roll.rollwright-fumble > .rollwright-stamp {
+	position: absolute;
+	top: -0.95em;
+	right: -1.2em;
+	z-index: 1;
+	margin: 0;
+	padding: 0.06em 0.38em 0.02em;
+	border: 0.12em solid var(--background-primary);
+	border-radius: 0.4em;
+	font-size: 0.6em;
+	line-height: 1.3;
+	letter-spacing: 0.06em;
+	vertical-align: baseline;
+	transform: rotate(8deg);
+	pointer-events: none;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
+}
+
+.rollwright-roll.rollwright-crit > .rollwright-stamp {
+	color: #3a2a00;
+	background: var(--rw-hi);
+}
+
+.rollwright-roll.rollwright-fumble > .rollwright-stamp {
+	color: #fff;
+	background: color-mix(in srgb, var(--rw-lo) 88%, #000);
+}
+
+/* Geplakt, niet gegroeid: hij komt groot en schuin aan en slaat neer op zijn plek. Zelfde moment
+   als vroeger (500 ms na de klik, als goud of rood er al is), maar zonder iets op te schuiven. */
+@keyframes rw-sticker {
+	0% { opacity: 0; transform: scale(2.4) rotate(-14deg); }
+	55% { opacity: 1; transform: scale(0.9) rotate(10deg); }
+	100% { opacity: 1; transform: scale(1) rotate(8deg); }
+}
+
+.rollwright-roll.rollwright-rolled > .rollwright-stamp {
+	animation: rw-sticker calc(300ms * var(--rw-slow)) calc(500ms * var(--rw-slow)) cubic-bezier(0.3, 1.4, 0.5, 1) both;
+}
+
+/* De vonk van de crit stond ook rechtsboven; nu de sticker daar zit, zit de vonk op de d20 links. */
+.rollwright-roll.rollwright-crit::after {
+	right: auto;
+	left: -0.45em;
+}
+
+/* Ronde 7b: op ware grootte (logboek-licht, run 42438770074) dekte de sticker de bovenkant van het
+   getal af; hij staat nu hoger en verder naar rechts, half buiten het token.
+   Ronde 7c (controleur): tekst 0.6em zodat NAT 20 op ware grootte leest, en nog iets hoger, want in
+   donkere thema's (Border, Minimal) raakte hij de bovenkant van de 20 nog. */
+
+/* De klap groeit vanuit links, zodat het token het woord ervoor niet afdekt (ronde 6, v2-25). */
+.rollwright-roll.rollwright-rolled.rollwright-crit:not(.rollwright-error),
+.rollwright-roll.rollwright-rolled.rollwright-fumble:not(.rollwright-error) {
+	transform-origin: left center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.rollwright-roll.rollwright-rolled > .rollwright-stamp {
+		animation: none !important;
+	}
+}
+
+/* Ronde 8 (Daan, 8 nov): drie dingen uit de echte Obsidian (run 42442820040).
+   1. Een tabeluitkomst in het logboek ("A dwarf counting her coins twice") stond groot en vet in de
+      eerste kolom, en de formule ernaast werd een kolom van één letter breed (r8-12). Vangnet: de
+      uitkomst krijgt hoogstens 70% van de breedte, de formule altijd minstens 6em. Met de klasse
+      rollwright-history-text (klus 9, Olaf) wordt tekst rustig en staat de bron eronder (stijl v9). */
+.rollwright-history-item {
+	grid-template-columns: fit-content(70%) auto minmax(6em, 1fr);
+}
+
+.rollwright-history-item.rollwright-history-text .rollwright-history-result {
+	grid-column: 1 / -1;
+	padding-right: 1.8em;
+	font-size: var(--font-ui-medium);
+	font-weight: var(--font-medium);
+	line-height: 1.35;
+	font-variant-numeric: normal;
+}
+
+.rollwright-history-item.rollwright-history-text .rollwright-history-formula {
+	grid-column: 1 / -1;
+	grid-row: 3;
+	margin-left: 0;
+}
+
+.rollwright-history-item.rollwright-history-text .rollwright-history-details {
+	grid-row: 4;
+}
+
+.rollwright-history-item.rollwright-history-text .rollwright-history-meta {
+	grid-row: 5;
+}
+
+/* 2. Het lege logboek is de eerste minuut: een groot d20-teken, één zin, de knop eronder, in het midden.
+      Niet meer een losse grijze zin met een knop die eraan vastplakt (r8-01). */
+.rollwright-history-empty {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--size-4-3);
+	margin-top: var(--size-4-6);
+	padding: var(--size-4-6) var(--size-4-4);
+	border: 1px dashed color-mix(in srgb, var(--rollwright-accent) 35%, var(--background-modifier-border));
+	border-radius: var(--radius-l);
+	background: color-mix(in srgb, var(--rollwright-accent) 5%, transparent);
+	text-align: center;
+	line-height: 1.45;
+}
+
+.rollwright-history-empty::before {
+	content: "";
+	width: 2.6em;
+	height: 2.6em;
+	background: var(--rollwright-accent);
+	-webkit-mask: var(--rw-d20) center / contain no-repeat;
+	mask: var(--rw-d20) center / contain no-repeat;
+}
+
+.rollwright-history-empty .rollwright-history-try {
+	margin-top: var(--size-4-1);
+}
+
+/* 3. Skin-tegels: alle drie toonden groot dezelfde gouden crit, dus je zag niet wat je koopt (r8-17).
+      Nu staat de gewone worp groot voorop, in de kleuren van de skin; de crit klein ernaast. */
+.rollwright-skin-preview-tile {
+	min-width: 8.5em;
+	padding: var(--size-4-3) var(--size-4-4) var(--size-4-2);
+}
+
+.rollwright-skin-preview-rolls .rollwright-skin-preview-small {
+	order: 1;
+	font-size: 1.15em;
+}
+
+.rollwright-skin-preview-rolls .rollwright-roll.rollwright-crit {
+	order: 2;
+	font-size: 1em;
+}
+
+/* Ronde 8b: in de tegel dekte de sticker de bovenkant van de 20 (r8-17, run 42443312533); hier staat
+   hij hoger en verder naar rechts, met ruimte in de tegel. */
+.rollwright-skin-preview-rolls {
+	padding: 1.1em 1.3em 0 0;
+}
+
+.rollwright-skin-preview-rolls .rollwright-roll > .rollwright-stamp {
+	top: -1.35em;
+	right: -1.7em;
+}
+
+/* Ronde 8c: de tegels waren op ware grootte klein en de derde viel op een tweede rij (run 42443792945).
+   Drie even brede kolommen over de hele breedte, de worpen groter. */
+.rollwright-skin-preview {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(10em, 1fr));
+}
+
+.rollwright-skin-preview-tile {
+	min-width: 0;
+	font-size: 1.12em;
+}
+
+.rollwright-skin-preview-rolls {
+	gap: 0.7em;
+}
+
+.rollwright-skin-preview-tile .rollwright-skin-preview-name {
+	font-size: var(--font-ui-small);
+}
+
+/* Ronde 9 (Daan): een tabeluitkomst heeft geen eigen vlak meer, dus de letter komt van het thema,
+   niet van de skin. Anders licht op wit bij Arcane in een licht thema (GEZIEN run 42447322873). */
+.rollwright-roll.rollwright-text:not(.rollwright-error):not(.rollwright-roll-block) .rollwright-value,
+.rollwright-roll.rollwright-text:not(.rollwright-error):not(.rollwright-roll-block) {
+	color: var(--text-normal);
+}
+
+/* Ronde 9b: de zin in het lege logboek verdeeld over twee even lange regels, geen los "here." */
+.rollwright-history-empty {
+	text-wrap: balance;
+}

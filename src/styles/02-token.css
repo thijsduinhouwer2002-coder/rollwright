@@ -1,0 +1,183 @@
+/* ==========================================================================================
+   Rollwright v2, voorstel van Daan (tak ontwerp/rollwright-v2, zie ontwerp-v2.md).
+   Eigen gezicht: een worp is een klein geëmailleerd speelstuk met een d20 als merkteken.
+   Alles leunt op de accentkleur en de kleuren van het thema, dus werkt in elk thema.
+   Bewegingen alleen na een klik (klasse rollwright-rolled), nooit bij openen.
+   ========================================================================================== */
+body {
+	--rw-d20: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linejoin='round' stroke-linecap='round'><path d='M12 2 21 7v10l-9 5-9-5V7z'/><path d='M12 8 16.6 15.6H7.4z'/><path d='M12 2v6M21 7l-4.4 8.6M3 7l4.4 8.6M3 17l4.4-1.4M21 17l-4.4-1.4M12 22l-4.6-6.4M12 22l4.6-6.4'/></svg>");
+	--rw-spark: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 0c.8 6.4 4.8 10.6 12 12-7.2 1.4-11.2 5.6-12 12-.8-6.4-4.8-10.6-12-12C7.2 10.6 11.2 6.4 12 0z'/></svg>");
+	--rw-shine: rgba(255, 255, 255, 0.55);
+	--rw-slow: 1;
+	--rw-hi: var(--color-yellow, #e0ac00);
+	--rw-lo: var(--color-red, #e93147);
+}
+
+body.theme-dark {
+	--rw-shine: rgba(255, 255, 255, 0.12);
+}
+
+.rollwright-roll:not(.rollwright-error) {
+	position: relative;
+	padding: 0.02em 0.5em 0.02em 0.38em;
+	border-radius: 0.6em;
+	border-color: color-mix(in srgb, var(--rollwright-accent) 40%, var(--rollwright-border));
+	background: linear-gradient(180deg,
+		color-mix(in srgb, var(--rollwright-accent) 20%, var(--rollwright-bg)),
+		color-mix(in srgb, var(--rollwright-accent) 8%, var(--rollwright-bg)));
+	box-shadow: inset 0 1px 0 var(--rw-shine), 0 1px 0 color-mix(in srgb, var(--rollwright-accent) 22%, transparent);
+	font-variant-numeric: tabular-nums;
+	transition: transform 120ms ease, box-shadow 160ms ease;
+}
+
+.rollwright-roll:not(.rollwright-error):hover {
+	transform: translateY(-1px);
+	box-shadow: inset 0 1px 0 var(--rw-shine), 0 3px 8px color-mix(in srgb, var(--rollwright-accent) 28%, transparent);
+}
+
+.rollwright-roll:not(.rollwright-error):active {
+	transform: translateY(0) scale(0.96);
+}
+
+/* Het merkteken: een d20 in plaats van het gewone Lucide-icoon. */
+.rollwright-roll .rollwright-icon svg {
+	display: none;
+}
+
+.rollwright-roll .rollwright-icon::before {
+	content: "";
+	display: block;
+	width: 1.05em;
+	height: 1.05em;
+	background: var(--rollwright-accent);
+	-webkit-mask: var(--rw-d20) center / contain no-repeat;
+	mask: var(--rw-d20) center / contain no-repeat;
+}
+
+.rollwright-roll .rollwright-value {
+	font-weight: var(--font-bold);
+}
+
+.rollwright-roll .rollwright-label {
+	opacity: 0.8;
+}
+
+/* Een blok (tabel, lijst, sectie): een kaart uit het spel, met een rand in de accentkleur links. */
+.rollwright-roll.rollwright-roll-block:not(.rollwright-error) {
+	background: color-mix(in srgb, var(--rollwright-accent) 7%, var(--rollwright-bg));
+	border-left: 3px solid var(--rollwright-accent);
+	border-radius: var(--radius-m);
+}
+
+.rollwright-roll.rollwright-roll-block .rollwright-value {
+	font-weight: var(--font-normal);
+}
+
+/* De worp rolt: de d20 tuimelt, het getal valt op zijn plek. */
+@keyframes rw-tumble {
+	0% { transform: rotate(-260deg) scale(0.5); opacity: 0.3; }
+	65% { transform: rotate(18deg) scale(1.2); opacity: 1; }
+	100% { transform: none; }
+}
+
+@keyframes rw-land {
+	0% { transform: translateY(-0.6em) scale(0.8); opacity: 0; filter: blur(2px); }
+	60% { transform: translateY(0.08em) scale(1.08); opacity: 1; filter: none; }
+	100% { transform: none; }
+}
+
+@keyframes rw-burst {
+	0% { transform: scale(0.4); opacity: 0.9; }
+	100% { transform: scale(2.6); opacity: 0; }
+}
+
+@keyframes rw-pop {
+	0%, 60% { transform: scale(0) rotate(-90deg); opacity: 0; }
+	80% { transform: scale(1.4) rotate(10deg); opacity: 1; }
+	100% { transform: none; }
+}
+
+@keyframes rw-shake {
+	0%, 100% { transform: none; }
+	20% { transform: translateX(-0.12em) rotate(-4deg); }
+	40% { transform: translateX(0.1em) rotate(3deg); }
+	60% { transform: translateX(-0.06em) rotate(-2deg); }
+	80% { transform: translateX(0.04em); }
+}
+
+.rollwright-rolled .rollwright-icon {
+	animation: rw-tumble calc(520ms * var(--rw-slow)) cubic-bezier(0.2, 0.8, 0.3, 1.2) both;
+}
+
+.rollwright-rolled:not(.rollwright-roll-block) .rollwright-value {
+	display: inline-block;
+	animation: rw-land calc(360ms * var(--rw-slow)) calc(140ms * var(--rw-slow)) cubic-bezier(0.2, 0.8, 0.3, 1.3) both;
+}
+
+/* Hoogst mogelijke worp: goud, een vonk en een korte ring die wegzwelt. */
+.rollwright-roll.rollwright-crit:not(.rollwright-error) {
+	border-color: color-mix(in srgb, var(--rw-hi) 75%, var(--rollwright-bg));
+	background: linear-gradient(180deg,
+		color-mix(in srgb, var(--rw-hi) 38%, var(--rollwright-bg)),
+		color-mix(in srgb, var(--rw-hi) 14%, var(--rollwright-bg)));
+	box-shadow: inset 0 1px 0 var(--rw-shine), 0 0 0 1px color-mix(in srgb, var(--rw-hi) 30%, transparent), 0 0 14px color-mix(in srgb, var(--rw-hi) 45%, transparent);
+}
+
+.rollwright-crit .rollwright-icon {
+	position: relative;
+}
+
+.rollwright-crit .rollwright-icon::before {
+	background: color-mix(in srgb, var(--rw-hi) 60%, var(--text-normal));
+}
+
+.rollwright-roll.rollwright-crit::after {
+	content: "";
+	position: absolute;
+	top: -0.45em;
+	right: -0.4em;
+	width: 0.8em;
+	height: 0.8em;
+	background: var(--rw-hi);
+	-webkit-mask: var(--rw-spark) center / contain no-repeat;
+	mask: var(--rw-spark) center / contain no-repeat;
+}
+
+/* De vonk komt pas als het getal geland is, zodat hij de crit niet verklapt. */
+.rollwright-rolled.rollwright-crit::after {
+	animation: rw-pop calc(900ms * var(--rw-slow)) ease-out both;
+}
+
+.rollwright-rolled.rollwright-crit .rollwright-icon::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: 50%;
+	border: 2px solid var(--rw-hi);
+	animation: rw-burst calc(700ms * var(--rw-slow)) calc(300ms * var(--rw-slow)) ease-out both;
+}
+
+/* Laagst mogelijke worp: rood getint, de d20 dof, het getal schudt even. */
+.rollwright-roll.rollwright-fumble:not(.rollwright-error) {
+	border-color: color-mix(in srgb, var(--rw-lo) 60%, var(--rollwright-bg));
+	background: linear-gradient(180deg,
+		color-mix(in srgb, var(--rw-lo) 22%, var(--rollwright-bg)),
+		color-mix(in srgb, var(--rw-lo) 9%, var(--rollwright-bg)));
+}
+
+.rollwright-fumble .rollwright-icon::before {
+	background: color-mix(in srgb, var(--rw-lo) 70%, var(--text-normal));
+}
+
+.rollwright-rolled.rollwright-fumble:not(.rollwright-roll-block) .rollwright-value {
+	animation: rw-land calc(300ms * var(--rw-slow)) calc(140ms * var(--rw-slow)) ease-out both, rw-shake calc(420ms * var(--rw-slow)) calc(460ms * var(--rw-slow)) ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.rollwright-rolled .rollwright-icon,
+	.rollwright-rolled .rollwright-value,
+	.rollwright-rolled .rollwright-icon::after {
+		animation: none !important;
+	}
+}
+

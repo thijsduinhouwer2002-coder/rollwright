@@ -27,11 +27,11 @@ Made by Thijs at [Dortus](https://dortus.com) for game masters and solo players 
 
 For a table, give it a block id such as `^loot` and write `` `dice: [[Treasure^loot]]` ``.
 
-All rolling is free. Two extra looks, Parchment and Arcane, are a one-time $6 purchase (see [Paid skins](#paid-skins)).
+All rolling is free. Optional skins are a one-time purchase (see [Paid skins](#paid-skins)).
 
 ## Full reference
 
-Everything below is detail for when you need it. Rollwright is at version 0.2.0. Before each release, automated tests run it in the real Obsidian app, in reading view and Live Preview.
+Everything below is detail for when you need it. Rollwright is at version 0.3.0. Before each release, automated tests run it in the real Obsidian app, in reading view and Live Preview.
 
 ### Rolling dice
 
@@ -151,8 +151,6 @@ If the first header is a formula, Rollwright rolls it and finds the matching row
 ## Paid skins
 
 **All rolling features are free. Two visual skins, Parchment and Arcane, are paid and need a license key.** The Classic skin is free.
-
-![The same session note in the three skins, Classic, Parchment and Arcane, in a dark and a light theme](https://raw.githubusercontent.com/thijsduinhouwer2002-coder/rollwright/main/images/skins.jpg)
 
 You buy the skins once through Polar: press Buy for $6 in the settings, pay, then paste the license key from your Polar purchases in the settings and press Activate. One key works on all your devices.
 
