@@ -29,7 +29,7 @@ For a table, give it a block id such as `^loot` and write `` `dice: [[Treasure^l
 
 ## Full reference
 
-Everything below is detail for when you need it. Rollwright is at version 0.3.1. Before each release, automated tests run it in the real Obsidian app, in reading view and Live Preview.
+Everything below is detail for when you need it. Rollwright is at version 0.3.2. Before each release, automated tests run it in the real Obsidian app, in reading view and Live Preview.
 
 ### Rolling dice
 

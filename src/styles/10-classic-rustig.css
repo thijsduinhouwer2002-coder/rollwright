@@ -1,0 +1,169 @@
+
+/* ==========================================================================================
+   Classic rustig (Daan, 8 nov 14:30, na bericht Thijs 14:06: "Classic is te uitbundig").
+   Classic is het gratis deel en mag niet zelf op een skin lijken. Daarom hier geen effecten:
+   platte tokens in de kleuren van het thema, geen glans, gloed, vonk, golf of klap.
+   De belofte blijft waar: de hoogste worp landt in goud (gouden rand, gouden cijfer, een kleine
+   rechte NAT 20-stempel), de laagste in rood. Alle effecten zijn van de betaalde skins.
+   Bereik: het token in de notitie als de body Classic heeft (niet de tegels van andere skins in de
+   instellingen), de Classic-tegel zelf, en de Roll log bij Classic.
+   :is() neemt de hoogste specificiteit van zijn delen (0,3,1), dus dit wint van de algemene regels
+   in 02 tot 06 zonder important-vlag; de betaalde skins raakt het niet.
+   ========================================================================================== */
+
+:is(body.rollwright-skin-classic .rollwright-roll:not(.rollwright-skin-preview-roll), .rollwright-skin-preview-tile.rollwright-skin-classic .rollwright-roll):not(.rollwright-error):not(.rollwright-text):not(.rollwright-roll-block) {
+	padding: 0.02em 0.45em 0.02em 0.36em;
+	border: 1px solid color-mix(in srgb, var(--rollwright-accent) 32%, var(--background-modifier-border));
+	border-radius: 0.45em;
+	background: color-mix(in srgb, var(--rollwright-accent) 9%, var(--background-primary));
+	box-shadow: none;
+	transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+:is(body.rollwright-skin-classic .rollwright-roll:not(.rollwright-skin-preview-roll), .rollwright-skin-preview-tile.rollwright-skin-classic .rollwright-roll):not(.rollwright-error):not(.rollwright-text):not(.rollwright-roll-block):hover {
+	transform: none;
+	box-shadow: none;
+	border-color: color-mix(in srgb, var(--rollwright-accent) 60%, transparent);
+	background: color-mix(in srgb, var(--rollwright-accent) 14%, var(--background-primary));
+}
+
+:is(body.rollwright-skin-classic .rollwright-roll:not(.rollwright-skin-preview-roll), .rollwright-skin-preview-tile.rollwright-skin-classic .rollwright-roll):not(.rollwright-error):not(.rollwright-text):not(.rollwright-roll-block):active {
+	transform: scale(0.97);
+}
+
+/* Hoogste worp: goud als rand en als kleur van cijfer en d20. Geen verloop, geen gloed, geen vonk. */
+:is(body.rollwright-skin-classic .rollwright-roll:not(.rollwright-skin-preview-roll), .rollwright-skin-preview-tile.rollwright-skin-classic .rollwright-roll).rollwright-crit:not(.rollwright-error):not(.rollwright-text):not(.rollwright-roll-block) {
+	border: 1.5px solid color-mix(in srgb, var(--rw-hi) 85%, var(--text-normal));
+	background: color-mix(in srgb, var(--rw-hi) 10%, var(--background-primary));
+	color: color-mix(in srgb, var(--rw-hi) 48%, var(--text-normal));
+	box-shadow: none;
+	animation: none;
+}
+
+body.theme-dark :is(body.rollwright-skin-classic .rollwright-roll:not(.rollwright-skin-preview-roll), .rollwright-skin-preview-tile.rollwright-skin-classic .rollwright-roll).rollwright-crit:not(.rollwright-error):not(.rollwright-text):not(.rollwright-roll-block) {
+	border-color: var(--rw-hi);
+	background: color-mix(in srgb, var(--rw-hi) 12%, var(--background-primary));
+	color: color-mix(in srgb, var(--rw-hi) 80%, var(--text-normal));
+}
+
+:is(body.rollwright-skin-classic .rollwright-roll:not(.rollwright-skin-preview-roll), .rollwright-skin-preview-tile.rollwright-skin-classic .rollwright-roll).rollwright-crit .rollwright-icon::before {
+	background: color-mix(in srgb, var(--rw-hi) 48%, var(--text-normal));
+}
+
+body.theme-dark :is(body.rollwright-skin-classic .rollwright-roll:not(.rollwright-skin-preview-roll), .rollwright-skin-preview-tile.rollwright-skin-classic .rollwright-roll).rollwright-crit .rollwright-icon::before {
+	background: color-mix(in srgb, var(--rw-hi) 80%, var(--text-normal));
+}
+
+/* Bij goud en rood het label vol (niet 0.8): anders zakt het goud in licht onder 4,5:1 (controleur 8 nov 15:30, gemeten 3,0:1). */
+:is(body.rollwright-skin-classic .rollwright-roll:not(.rollwright-skin-preview-roll), .rollwright-skin-preview-tile.rollwright-skin-classic .rollwright-roll):is(.rollwright-crit, .rollwright-fumble) .rollwright-label {
+	opacity: 1;
+}
+
+/* Laagste worp: rood als rand en kleur. Geen dreun, geen schudden. */
+:is(body.rollwright-skin-classic .rollwright-roll:not(.rollwright-skin-preview-roll), .rollwright-skin-preview-tile.rollwright-skin-classic .rollwright-roll).rollwright-fumble:not(.rollwright-error):not(.rollwright-text):not(.rollwright-roll-block) {
+	border: 1.5px solid color-mix(in srgb, var(--rw-lo) 85%, var(--background-primary));
+	background: color-mix(in srgb, var(--rw-lo) 8%, var(--background-primary));
+	color: color-mix(in srgb, var(--rw-lo) 70%, var(--text-normal));
+	box-shadow: none;
+	animation: none;
+}
+
+:is(body.rollwright-skin-classic .rollwright-roll:not(.rollwright-skin-preview-roll), .rollwright-skin-preview-tile.rollwright-skin-classic .rollwright-roll).rollwright-fumble .rollwright-icon::before {
+	background: color-mix(in srgb, var(--rw-lo) 70%, var(--text-normal));
+}
+
+/* Geen vonk (::after), geen golf (::before), geen ring om de d20. */
+:is(body.rollwright-skin-classic .rollwright-roll:not(.rollwright-skin-preview-roll), .rollwright-skin-preview-tile.rollwright-skin-classic .rollwright-roll).rollwright-crit::after,
+:is(body.rollwright-skin-classic .rollwright-roll:not(.rollwright-skin-preview-roll), .rollwright-skin-preview-tile.rollwright-skin-classic .rollwright-roll).rollwright-crit::before,
+:is(body.rollwright-skin-classic .rollwright-roll:not(.rollwright-skin-preview-roll), .rollwright-skin-preview-tile.rollwright-skin-classic .rollwright-roll).rollwright-crit .rollwright-icon::after {
+	content: none;
+	animation: none;
+}
+
+/* De stempel: kleiner, recht, plat. Een label in de kleur van de pagina met een gouden of rode
+   rand, geen volle sticker met schaduw. Hij zit nog steeds los van de regel (springt niet). */
+:is(body.rollwright-skin-classic .rollwright-roll:not(.rollwright-skin-preview-roll), .rollwright-skin-preview-tile.rollwright-skin-classic .rollwright-roll) > .rollwright-stamp {
+	top: -1.05em;
+	right: -0.8em;
+	padding: 0.04em 0.32em 0;
+	border: 1px solid currentColor;
+	border-radius: 0.3em;
+	background: var(--background-primary);
+	font-size: 0.58em; /* controleur: niet onder ±9 px */
+	letter-spacing: 0.05em;
+	transform: none;
+	box-shadow: none;
+}
+
+:is(body.rollwright-skin-classic .rollwright-roll:not(.rollwright-skin-preview-roll), .rollwright-skin-preview-tile.rollwright-skin-classic .rollwright-roll).rollwright-crit > .rollwright-stamp {
+	color: color-mix(in srgb, var(--rw-hi) 48%, var(--text-normal));
+	background: var(--background-primary);
+}
+
+body.theme-dark :is(body.rollwright-skin-classic .rollwright-roll:not(.rollwright-skin-preview-roll), .rollwright-skin-preview-tile.rollwright-skin-classic .rollwright-roll).rollwright-crit > .rollwright-stamp {
+	color: color-mix(in srgb, var(--rw-hi) 80%, var(--text-normal));
+}
+
+:is(body.rollwright-skin-classic .rollwright-roll:not(.rollwright-skin-preview-roll), .rollwright-skin-preview-tile.rollwright-skin-classic .rollwright-roll).rollwright-fumble > .rollwright-stamp {
+	color: color-mix(in srgb, var(--rw-lo) 70%, var(--text-normal));
+	background: var(--background-primary);
+}
+
+/* Korte beweging: de d20 draait een kwartslag en het getal verschijnt. Samen ±300 ms. */
+@keyframes rw-classic-turn {
+	0% { transform: rotate(-90deg); opacity: 0.4; }
+	100% { transform: none; opacity: 1; }
+}
+
+@keyframes rw-classic-in {
+	0% { opacity: 0; transform: translateY(-0.15em); }
+	100% { opacity: 1; transform: none; }
+}
+
+@keyframes rw-classic-fade {
+	0% { opacity: 0; }
+	100% { opacity: 1; }
+}
+
+:is(body.rollwright-skin-classic .rollwright-roll:not(.rollwright-skin-preview-roll), .rollwright-skin-preview-tile.rollwright-skin-classic .rollwright-roll).rollwright-rolled .rollwright-icon {
+	animation: rw-classic-turn calc(240ms * var(--rw-slow)) ease-out both;
+}
+
+:is(body.rollwright-skin-classic .rollwright-roll:not(.rollwright-skin-preview-roll), .rollwright-skin-preview-tile.rollwright-skin-classic .rollwright-roll).rollwright-rolled:not(.rollwright-roll-block) .rollwright-value {
+	animation: rw-classic-in calc(200ms * var(--rw-slow)) calc(60ms * var(--rw-slow)) ease-out both;
+}
+
+:is(body.rollwright-skin-classic .rollwright-roll:not(.rollwright-skin-preview-roll), .rollwright-skin-preview-tile.rollwright-skin-classic .rollwright-roll).rollwright-rolled > .rollwright-stamp {
+	animation: rw-classic-fade calc(160ms * var(--rw-slow)) ease-out both;
+}
+
+/* Roll log bij Classic: goud en rood als rand en kleur, zonder verloop, schaduw of gloed. */
+body.rollwright-skin-classic .rollwright-history-item.rollwright-crit {
+	border-color: color-mix(in srgb, var(--rw-hi) 70%, var(--background-modifier-border));
+	background: color-mix(in srgb, var(--rw-hi) 6%, var(--background-primary));
+	box-shadow: none;
+}
+
+body.rollwright-skin-classic .rollwright-history-item.rollwright-fumble {
+	border-color: color-mix(in srgb, var(--rw-lo) 60%, var(--background-modifier-border));
+	background: color-mix(in srgb, var(--rw-lo) 5%, var(--background-primary));
+	box-shadow: none;
+}
+
+body.rollwright-skin-classic .rollwright-history-item::before,
+body.rollwright-skin-classic .rollwright-history-item.rollwright-history-latest::before,
+body.rollwright-skin-classic .rollwright-history-item.rollwright-history-latest.rollwright-crit::before,
+body.rollwright-skin-classic .rollwright-history-item.rollwright-history-latest.rollwright-fumble::before,
+body.rollwright-skin-classic .rollwright-history-item.rollwright-history-latest:not(.rollwright-crit):not(.rollwright-fumble)::before {
+	filter: none;
+}
+
+body.rollwright-skin-classic .rollwright-history-item.rollwright-history-latest {
+	box-shadow: none;
+}
+
+body.rollwright-skin-classic .rollwright-history-item > .rollwright-stamp {
+	border: 1px solid currentColor;
+	background: transparent;
+	box-shadow: none;
+}
