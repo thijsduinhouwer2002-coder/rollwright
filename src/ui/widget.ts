@@ -2,6 +2,7 @@ import { Component, Keymap, MarkdownRenderer, Notice, setIcon, setTooltip, TFile
 import { formatResult, rangeOf } from "../engine";
 import type RollwrightPlugin from "../main";
 import { defuseRolls } from "../rollers/defuse";
+import { quietNestedCodes } from "./nested-code";
 import { stampText, type Extreme } from "../rollers/extreme";
 import { parseSpec } from "../rollers/spec";
 import type { RollOutcome } from "../rollers/run";
@@ -209,6 +210,7 @@ async function showOutcome(plugin: RollwrightPlugin, target: HTMLElement, outcom
 		// A render that finished after a newer result was shown no longer sits in target:
 		// then class and tooltip stay those of the newer result.
 		if (value.parentElement !== target) return null;
+		quietNestedCodes(value);
 		if (isBlockValue(value)) target.addClass(BLOCK_CLASS);
 	}
 	setTooltip(target, tooltipFor(outcome));

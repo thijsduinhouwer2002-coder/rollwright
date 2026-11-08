@@ -6,8 +6,11 @@ import { normalizePath, Notice, type App, type TFile } from "obsidian";
  */
 export const EXAMPLE_NOTE_NAME = "Rollwright example";
 
-/** The text of the example note. The tables sit at the bottom of the same note, so it is one file. */
-export function exampleNoteText(name: string = EXAMPLE_NOTE_NAME): string {
+/**
+ * The text of the example note. The tables sit at the bottom of the same note, so it is one file.
+ * The table rolls link with [[#^id]] (this note), so they keep working when the note is renamed.
+ */
+export function exampleNoteText(): string {
 	return [
 		"> [!tip] Every roll in this note is live",
 		"> Click one to roll it again. Your rolls are kept in the roll log.",
@@ -20,9 +23,9 @@ export function exampleNoteText(name: string = EXAMPLE_NOTE_NAME): string {
 		"",
 		"**Saving throw** `dice: 1d20|text(Wisdom save)`",
 		"",
-		`Who is at the bar tonight? \`dice: [[${name}^guests]]\``,
+		"Who is at the bar tonight? `dice: [[#^guests]]`",
 		"",
-		`The stranger says: \`dice: [[${name}^rumours]]\``,
+		"The stranger says: `dice: [[#^rumours]]`",
 		"",
 		"## Tavern tables",
 		"",

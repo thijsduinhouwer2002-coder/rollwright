@@ -124,7 +124,7 @@ The number flags only change dice results, not picks from tables, lists or notes
 | `#tag\|link` | A link to one random note with the tag |
 | `2d#tag`, `#tag\|-\|paragraph,yaml` | Several picks, and block types |
 
-The forms `[[Note#^id]]` and `[text](Note#^id)` also work.
+The forms `[[Note#^id]]` and `[text](Note#^id)` also work. For a table in the same note, write `[[#^id]]`; that keeps working when you rename the note.
 
 A roll inside a block or section you draw is not rolled again: it shows as plain code. An embedded note in such a result becomes a link. Embedded images stay.
 

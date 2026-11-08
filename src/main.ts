@@ -205,7 +205,8 @@ export default class RollwrightPlugin extends Plugin {
 	}
 
 	private async readNote(link: string, sourcePath: string): Promise<NoteData | null> {
-		const file = this.app.metadataCache.getFirstLinkpathDest(link, sourcePath);
+		// [[#^id]] or [[^id]] points at the note itself, so a renamed note keeps working.
+		const file = link === "" ? this.app.vault.getAbstractFileByPath(sourcePath) : this.app.metadataCache.getFirstLinkpathDest(link, sourcePath);
 		if (!(file instanceof TFile)) return null;
 		return { path: file.path, markdown: await this.app.vault.cachedRead(file) };
 	}

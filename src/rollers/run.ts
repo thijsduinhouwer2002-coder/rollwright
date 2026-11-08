@@ -181,40 +181,44 @@ async function rollNote(spec: Spec, context: RollContext, depth: number): Promis
 	const random = context.random ?? defaultRandom;
 	const note = await context.readNote(target.note, context.sourcePath);
 	if (!note) throw new DiceError(`Note "${target.note}" was not found. Check the name in the link, or add the folder, like [[Folder/Note]].`);
+	// A roll inside that note (a table cell, a list item) finds its links from there, so [[#^id]] means that note.
+	const inner: RollContext = { ...context, sourcePath: note.path };
+	const where = target.note === "" ? "this note" : `"${target.note}"`;
+	const Where = target.note === "" ? "This note" : where;
 	const count = pickCount(target.prefix, context);
 	const blocks = parseBlocks(note.markdown);
 
 	if (target.blockId !== undefined) {
 		const block = blocks.find((b) => b.id === target.blockId);
-		if (!block) throw new DiceError(`Block ^${target.blockId} was not found in "${target.note}". Check the id, or add ^${target.blockId} on its own line right after that table or list.`);
+		if (!block) throw new DiceError(`Block ^${target.blockId} was not found in ${where}. Check the id, or add ^${target.blockId} on its own line right after that table or list.`);
 		if (block.type === "table") {
 			const table = parseTable(block.text);
 			// A word that is both a flag and a column of this table means the column.
 			const column = spec.parts.find((part) => spec.args.includes(part) || findColumn(table, part) !== -1);
 			const flags = column === undefined ? spec.flags : withoutFlag(spec.flags, column);
 			const results: { text: string; detail: string }[] = [];
-			for (let i = 0; i < count; i++) results.push(await pickFromTable(table, column, context, depth));
+			for (let i = 0; i < count; i++) results.push(await pickFromTable(table, column, inner, depth));
 			const detail = results.map((r) => r.detail).filter((d) => d !== "").join("; ");
 			return { kind: "table", text: results.map((r) => r.text).join(", "), details: detail, source: note.path, flags };
 		}
 		if (block.type === "list") {
 			const picks = pickMany(listItems(block.text), count, random, "The list is empty. Add items to it, like - Goblin.", context);
 			const texts: string[] = [];
-			for (const item of picks) texts.push(await resolveNested(item, context, depth));
+			for (const item of picks) texts.push(await resolveNested(item, inner, depth));
 			return { kind: "list", text: texts.join(", "), details: "", source: note.path };
 		}
 		return { kind: "section", text: block.text, details: "", source: note.path };
 	}
 
 	if (spec.args.some((arg) => arg.toLowerCase() === "line")) {
-		const picks = pickMany(noteLines(note.markdown), count, random, `"${target.note}" has no lines. Add some text to it, or link another note, like [[Names]]|line.`, context);
+		const picks = pickMany(noteLines(note.markdown), count, random, `${Where} has no lines. Add some text to it, or link another note, like [[Names]]|line.`, context);
 		return { kind: "line", text: picks.join("\n"), details: "", source: note.path };
 	}
 
 	const types = blockTypes(spec.args);
 	const empty = types.length === 0
-		? `"${target.note}" has no text to pick from. Add some text to it, like - Goblin.`
-		: `"${target.note}" has no matching blocks. Check the block types after |, like [[${target.note}]]|paragraph.`;
+		? `${Where} has no text to pick from. Add some text to it, like - Goblin.`
+		: `${Where} has no matching blocks. Check the block types after |, like [[${target.note === "" ? "Note" : target.note}]]|paragraph.`;
 	const picks = pickMany(selectBlocks(blocks, types), count, random, empty, context);
 	return { kind: "section", text: picks.join("\n\n"), details: "", source: note.path };
 }

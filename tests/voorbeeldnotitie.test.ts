@@ -77,25 +77,27 @@ describe("the example note", () => {
 		const codes = (text.match(/`[^`]+`/g) ?? []).map((m) => m.slice(1, -1));
 		expect(codes).toHaveLength(6);
 		for (const code of codes) expect(formulaFromCode(code)).not.toBeNull();
-		expect(text).toContain("[[Rollwright example^guests]]");
-		expect(text).toContain("[[Rollwright example^rumours]]");
+		expect(text).toContain("[[#^guests]]");
+		expect(text).toContain("[[#^rumours]]");
+		expect(text).not.toContain(EXAMPLE_NOTE_NAME);
 		expect(text).toMatch(/\n\^guests\n/);
 		expect(text).toMatch(/\n\^rumours\n/);
 	});
 });
 
 describe("the tables in the example note", () => {
-	it("roll on the lists at the bottom of the same note", async () => {
-		const note = { path: "Rollwright example.md", markdown: exampleNoteText() };
+	it("roll on the lists at the bottom of the same note, also after a rename", async () => {
+		// [[#^id]] reaches readNote as an empty link: the plugin reads the note itself (main.ts readNote).
+		const note = { path: "Renamed by the user.md", markdown: exampleNoteText() };
 		const context = {
-			readNote: async (link: string) => (link === EXAMPLE_NOTE_NAME ? note : null),
+			readNote: async (link: string) => (link === "" ? note : null),
 			notesWithTag: async () => [],
 			sourcePath: note.path,
 		};
-		const guests = await rollSpec("[[Rollwright example^guests]]", context);
+		const guests = await rollSpec("[[#^guests]]", context);
 		expect(guests.kind).toBe("list");
 		expect(["A dwarf counting her coins twice", "Two elves arguing over a map", "A bard with one string left", "A sleeping knight in muddy armour"]).toContain(guests.text);
-		const rumours = await rollSpec("[[Rollwright example^rumours]]", context);
+		const rumours = await rollSpec("[[#^rumours]]", context);
 		expect(rumours.kind).toBe("list");
 		expect(rumours.text).toMatch(/^"The (bridge|old mine)|^"Someone/);
 	});
