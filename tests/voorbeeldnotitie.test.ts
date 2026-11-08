@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { EXAMPLE_NOTE_NAME, exampleNoteText, openExampleNote, showExampleNote } from "../src/ui/example-note";
+import { EXAMPLE_NOTE_NAME, exampleNoteExists, exampleNoteText, openExampleNote, showExampleNote } from "../src/ui/example-note";
 import { formulaFromCode } from "../src/rollers/inline";
 import { RollHistoryView } from "../src/ui/history-view";
 import { rollSpec } from "../src/rollers/run";
@@ -103,9 +103,21 @@ describe("the tables in the example note", () => {
 	});
 });
 
+describe("whether the example note exists", () => {
+	it("trusts the file list over a link cache that is behind", () => {
+		const app = (files: string[], linked: { path: string } | null) => ({
+			vault: { getMarkdownFiles: () => files.map((basename) => ({ basename })) },
+			metadataCache: { getFirstLinkpathDest: () => linked },
+		}) as never;
+		expect(exampleNoteExists(app([EXAMPLE_NOTE_NAME], null))).toBe(true);
+		expect(exampleNoteExists(app(["Other"], { path: "Rollwright example.md" }))).toBe(false);
+		expect(exampleNoteExists(app([`${EXAMPLE_NOTE_NAME} 2`], null))).toBe(false);
+	});
+});
+
 describe("the empty roll log", () => {
 	it("shows the button that makes the example note, and only when the log is empty", () => {
-		const make = (history: unknown[]) => {
+		const make = (history: unknown[], linked: { path: string } | null = null) => {
 			const els: { tag: string; cls: string[]; text: string; listeners: Record<string, () => void> }[] = [];
 			const el = (tag: string, opts: { cls?: string | string[]; text?: string } = {}) => {
 				const made = { tag, cls: ([] as string[]).concat(opts.cls ?? []), text: opts.text ?? "", listeners: {} as Record<string, () => void> };
@@ -120,7 +132,7 @@ describe("the empty roll log", () => {
 					addEventListener: (name: string, fn: () => void) => (made.listeners[name] = fn),
 				});
 			};
-			const { app } = fakeApp();
+			const { app } = fakeApp({ linked });
 			const view = new RollHistoryView({} as never, { settings: { formulas: [], history } } as never);
 			Object.assign(view, { contentEl: el("div"), app });
 			view.refresh();
@@ -133,5 +145,11 @@ describe("the empty roll log", () => {
 		expect(empty.app.fileManager.getNewFileParent).toHaveBeenCalled();
 		const full = make([{ time: 1, formula: "1d20", result: "7", details: "", source: "" }]);
 		expect(full.els.some((e) => e.cls.includes("rollwright-history-try"))).toBe(false);
+		// Daan, beoordeling 10: once the note exists the button opens it and says so.
+		const there = make([], { path: "Rollwright example.md" });
+		const open = there.els.find((e) => e.cls.includes("rollwright-history-try"));
+		expect(open?.text).toBe("Open the example note");
+		open?.listeners.click?.();
+		expect(there.app.vault.create).not.toHaveBeenCalled();
 	});
 });

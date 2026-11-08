@@ -65,6 +65,16 @@ export async function openExampleNote(app: App): Promise<TFile> {
 	return file;
 }
 
+/**
+ * True when there is a note named like the example note. The file list is the last word: right after a
+ * create or delete event the link cache can still be behind. Without a file list, the link cache.
+ */
+export function exampleNoteExists(app: App): boolean {
+	const files = app.vault.getMarkdownFiles?.();
+	if (files) return files.some((file) => file.basename === EXAMPLE_NOTE_NAME);
+	return app.metadataCache.getFirstLinkpathDest(EXAMPLE_NOTE_NAME, "") !== null;
+}
+
 /** For the button and the command: like openExampleNote, but a failure becomes a notice. */
 export async function showExampleNote(app: App): Promise<void> {
 	try {

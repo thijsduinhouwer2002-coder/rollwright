@@ -12,6 +12,13 @@ export function parseWholeNumber(value: string, min: number): number | null {
 	return Number.isSafeInteger(number) && number >= min ? number : null;
 }
 
+/** Turns an async handler into one that returns nothing, for callbacks that expect no promise. A failure is logged, not lost. */
+export function later<A extends unknown[]>(handler: (...args: A) => Promise<void>): (...args: A) => void {
+	return (...args) => {
+		handler(...args).catch((error: unknown) => console.error("Rollwright:", error));
+	};
+}
+
 export const COMING_SOON = "Paid skins are coming soon.";
 export const CHECK_NOTE = "It is checked online at most once every 30 days.";
 
@@ -63,7 +70,10 @@ export class RollwrightSettingTab extends PluginSettingTab {
 		super(app, plugin);
 	}
 
-	/** The tab for Obsidian before 1.13. From 1.13 on, Obsidian draws getSettingDefinitions() instead. */
+	/**
+	 * The tab for Obsidian before 1.13. From 1.13 on, Obsidian draws getSettingDefinitions() instead and never calls this.
+	 * display() is deprecated since 1.13, but minAppVersion is 1.7.2, so 1.7.2 to 1.12 still need it (review of 0.3.0, point 4).
+	 */
 	display(): void {
 		const { containerEl } = this;
 		containerEl.empty();
@@ -98,37 +108,37 @@ export class RollwrightSettingTab extends PluginSettingTab {
 				name: "Default die",
 				desc: "The number of sides when a formula leaves it out, as in 3d.",
 				build: (setting) =>
-					setting.addText((text) =>
-						text.setValue(String(settings.defaultSides)).onChange(async (value) => {
+					void setting.addText((text) =>
+						text.setValue(String(settings.defaultSides)).onChange(later(async (value) => {
 							const sides = parseWholeNumber(value, 1);
 							if (sides === null) return;
 							settings.defaultSides = sides;
 							await save();
-						}),
+						})),
 					),
 			},
 			{
 				name: "Default number of dice",
 				desc: "The number of dice when a formula leaves it out, as in d6.",
 				build: (setting) =>
-					setting.addText((text) =>
-						text.setValue(String(settings.defaultCount)).onChange(async (value) => {
+					void setting.addText((text) =>
+						text.setValue(String(settings.defaultCount)).onChange(later(async (value) => {
 							const count = parseWholeNumber(value, 0);
 							if (count === null) return;
 							settings.defaultCount = count;
 							await save();
-						}),
+						})),
 					),
 			},
 			{
 				name: "Keep the formula when a dice-mod code is replaced",
 				desc: "On: 3d6 -> [2, 5, 4] -> 11. Off: [2, 5, 4] -> 11. Results of tables, lists and notes never show a formula.",
 				build: (setting) =>
-					setting.addToggle((toggle) =>
-						toggle.setValue(settings.diceModFormula).onChange(async (value) => {
+					void setting.addToggle((toggle) =>
+						toggle.setValue(settings.diceModFormula).onChange(later(async (value) => {
 							settings.diceModFormula = value;
 							await save();
-						}),
+						})),
 					),
 			},
 		];
@@ -136,25 +146,25 @@ export class RollwrightSettingTab extends PluginSettingTab {
 		const formulas: SettingRow[] = settings.formulas.map((formula, index) => ({
 			name: "",
 			build: (setting) =>
-				setting
+				void setting
 					.addText((text) =>
-						text.setPlaceholder("Name").setValue(formula.name).onChange(async (value) => {
+						text.setPlaceholder("Name").setValue(formula.name).onChange(later(async (value) => {
 							formula.name = value.trim();
 							await save();
-						}),
+						})),
 					)
 					.addText((text) =>
-						text.setPlaceholder("Formula").setValue(formula.formula).onChange(async (value) => {
+						text.setPlaceholder("Formula").setValue(formula.formula).onChange(later(async (value) => {
 							formula.formula = value.trim();
 							await save();
-						}),
+						})),
 					)
 					.addExtraButton((button) =>
-						button.setIcon("trash").setTooltip("Remove").onClick(async () => {
+						button.setIcon("trash").setTooltip("Remove").onClick(later(async () => {
 							settings.formulas.splice(index, 1);
 							await save();
 							this.redraw();
-						}),
+						})),
 					),
 		}));
 		formulas.push(
@@ -162,23 +172,23 @@ export class RollwrightSettingTab extends PluginSettingTab {
 				name: "Add a formula",
 				desc: "Use its name in any roll, such as dice: attack.",
 				build: (setting) =>
-					setting.addButton((button) =>
-						button.setButtonText("Add").onClick(async () => {
+					void setting.addButton((button) =>
+						button.setButtonText("Add").onClick(later(async () => {
 							settings.formulas.push({ name: `formula${settings.formulas.length + 1}`, formula: "1d20" });
 							await save();
 							this.redraw();
-						}),
+						})),
 					),
 			},
 			{
 				name: "Import saved formulas",
 				desc: "Copies named formulas from the data file of the Dice Roller plugin, if you have it. That file is only read, and existing names stay as they are.",
 				build: (setting) =>
-					setting.addButton((button) =>
-						button.setButtonText("Import").onClick(async () => {
+					void setting.addButton((button) =>
+						button.setButtonText("Import").onClick(later(async () => {
 							await this.plugin.importSavedFormulas();
 							this.redraw();
-						}),
+						})),
 					),
 			},
 		);
@@ -200,13 +210,13 @@ export class RollwrightSettingTab extends PluginSettingTab {
 				name: "Skin",
 				desc: `All rolling is free. ${paidNames} are paid skins and need a license key.${ready ? "" : ` ${COMING_SOON}`}`,
 				build: (setting) =>
-					setting.addDropdown((dropdown) => {
+					void setting.addDropdown((dropdown) => {
 						for (const skin of availableSkins(this.plugin.isLicensed)) dropdown.addOption(skin.id, skin.name);
-						dropdown.setValue(settings.skin).onChange(async (value) => {
+						dropdown.setValue(settings.skin).onChange(later(async (value) => {
 							settings.skin = value;
 							await this.plugin.saveSettings();
 							this.plugin.applySkin();
-						});
+						}));
 					}),
 			},
 			{ name: "", build: (setting) => renderSkinPreview(setting.infoEl, this.plugin.isLicensed) },
@@ -223,7 +233,7 @@ export class RollwrightSettingTab extends PluginSettingTab {
 				name: "Get the paid skins",
 				desc: `${paidNames}. One payment, yours to keep.`,
 				build: (setting) =>
-					setting.addButton((button) =>
+					void setting.addButton((button) =>
 						button.setButtonText(`Buy for ${PRICE_TEXT}`).onClick(() => {
 							activeWindow.open(this.plugin.polarIds.buyUrl);
 						}),
@@ -242,12 +252,12 @@ export class RollwrightSettingTab extends PluginSettingTab {
 							}),
 						)
 						.addButton((button) =>
-							button.setButtonText("Activate").onClick(async () => {
+							button.setButtonText("Activate").onClick(later(async () => {
 								button.setDisabled(true);
 								const outcome = await this.plugin.activateLicense(draft);
 								this.lastError = outcome === "valid" ? null : outcome;
 								this.redraw();
-							}),
+							})),
 						);
 				},
 			},

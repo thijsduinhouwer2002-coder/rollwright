@@ -1,7 +1,7 @@
 import { ItemView, Notice, setIcon, type WorkspaceLeaf } from "obsidian";
 import type RollwrightPlugin from "../main";
 import type { HistoryEntry } from "../main";
-import { showExampleNote } from "./example-note";
+import { EXAMPLE_NOTE_NAME, exampleNoteExists, showExampleNote } from "./example-note";
 import { groupHistory, shortTime } from "./history-groups";
 import { historyLabel, isNumberResult } from "./history-label";
 import { extremeClasses, STAMP_CLASS } from "./widget";
@@ -27,6 +27,19 @@ export class RollHistoryView extends ItemView {
 	}
 
 	async onOpen(): Promise<void> {
+		// The empty log names its button after the example note: "Try it" while there is none, "Open" once
+		// it exists (Daan, beoordeling 10). Only a change to that one note redraws the panel.
+		const vault = this.app?.vault;
+		if (vault?.on) {
+			const redraw = (file: { basename?: string }, oldPath = ""): void => {
+				const old = oldPath.split("/").pop() ?? "";
+				const touched = file.basename === EXAMPLE_NOTE_NAME || old === `${EXAMPLE_NOTE_NAME}.md`;
+				if (touched && this.plugin.settings.history.length === 0) this.refresh();
+			};
+			this.registerEvent(vault.on("create", (file) => redraw(file as { basename?: string })));
+			this.registerEvent(vault.on("delete", (file) => redraw(file as { basename?: string })));
+			this.registerEvent(vault.on("rename", (file, oldPath) => redraw(file as { basename?: string }, oldPath)));
+		}
 		this.refresh();
 		await Promise.resolve();
 	}
@@ -90,7 +103,8 @@ export class RollHistoryView extends ItemView {
 		if (history.length === 0) {
 			const empty = root.createDiv({ cls: "rollwright-history-empty", text: "Click a roll in a note to see it here." });
 			// The first minute (ontwerp-v2 point 5): one button to a note full of live rolls, never made unasked.
-			const tryIt = empty.createEl("button", { cls: ["mod-cta", "rollwright-history-try"], text: "Try it: create an example note" });
+			const text = exampleNoteExists(this.app) ? "Open the example note" : "Try it: create an example note";
+			const tryIt = empty.createEl("button", { cls: ["mod-cta", "rollwright-history-try"], text });
 			tryIt.addEventListener("click", () => void showExampleNote(this.app));
 			return;
 		}

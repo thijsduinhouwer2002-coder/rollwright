@@ -1,0 +1,11 @@
+
+/* Minder beweging (prefers-reduced-motion): nergens in Rollwright een animatie.
+   Zonder important-vlag (keuring 0.3.0): :is(body, #rollwright-rustig) telt als een id, dus deze regel wint
+   van elke regel met alleen klassen, ook van de skins. Het id hoeft niet te bestaan; body matcht. */
+@media (prefers-reduced-motion: reduce) {
+	:is(body, #rollwright-rustig) [class*="rollwright-"],
+	:is(body, #rollwright-rustig) [class*="rollwright-"]::before,
+	:is(body, #rollwright-rustig) [class*="rollwright-"]::after {
+		animation: none;
+	}
+}

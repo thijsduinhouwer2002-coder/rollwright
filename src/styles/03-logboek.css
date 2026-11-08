@@ -19,7 +19,7 @@
 	position: relative;
 	display: grid;
 	grid-template-columns: auto 1fr;
-	column-gap: 0.6em;
+	gap: 0 0.6em;
 	align-items: baseline;
 	margin-bottom: var(--size-4-2);
 	padding: var(--size-4-2) var(--size-4-3);
@@ -86,7 +86,7 @@
    een lege stempelkolom geen extra ruimte geeft; de formule houdt zelf zijn 0.6em afstand. */
 .rollwright-history-item {
 	grid-template-columns: auto auto 1fr;
-	column-gap: 0;
+	gap: 0;
 }
 
 .rollwright-history-formula {
@@ -205,7 +205,7 @@ button.rollwright-history-clear:not(.clickable-icon) {
 	width: 1px;
 	height: 1px;
 	overflow: hidden;
-	clip-path: inset(50%);
+	opacity: 0;
 	white-space: nowrap;
 }
 
@@ -216,7 +216,7 @@ button.rollwright-history-clear:not(.clickable-icon) {
 @media (prefers-reduced-motion: reduce) {
 	.rollwright-rolled .rollwright-stamp,
 	.rollwright-rolled.rollwright-crit::after {
-		animation: none !important;
+		animation: none;
 	}
 }
 

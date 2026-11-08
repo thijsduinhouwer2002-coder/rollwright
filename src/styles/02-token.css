@@ -177,7 +177,7 @@ body.theme-dark {
 	.rollwright-rolled .rollwright-icon,
 	.rollwright-rolled .rollwright-value,
 	.rollwright-rolled .rollwright-icon::after {
-		animation: none !important;
+		animation: none;
 	}
 }
 

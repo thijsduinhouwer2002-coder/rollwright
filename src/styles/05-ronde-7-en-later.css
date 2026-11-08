@@ -11,7 +11,7 @@
 .rollwright-roll.rollwright-crit > .rollwright-stamp,
 .rollwright-roll.rollwright-fumble > .rollwright-stamp {
 	position: absolute;
-	top: -0.95em;
+	top: -1.15em; /* ronde f: 2 px hoger, raakt de 1 niet meer */
 	right: -1.2em;
 	z-index: 1;
 	margin: 0;
@@ -68,7 +68,7 @@
 
 @media (prefers-reduced-motion: reduce) {
 	.rollwright-roll.rollwright-rolled > .rollwright-stamp {
-		animation: none !important;
+		animation: none;
 	}
 }
 

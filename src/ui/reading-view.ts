@@ -38,7 +38,7 @@ export function processReadingView(plugin: RollwrightPlugin, el: HTMLElement, ct
 		const keep = dice.keep && position !== undefined;
 		const place = position ? `${position.line}:${position.index}` : `el:${++unplaced}`;
 		nth++;
-		const span = activeDocument.createElement("span");
+		const span = createSpan();
 		code.replaceWith(span);
 		const child = new MarkdownRenderChild(span);
 		ctx.addChild(child);

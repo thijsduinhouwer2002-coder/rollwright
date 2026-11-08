@@ -82,7 +82,7 @@ body.rollwright-skin-arcane .rollwright-roll,
 
 @media (prefers-reduced-motion: reduce) {
 	.rollwright-roll.rollwright-rolled.rollwright-crit::before {
-		animation: none !important;
+		animation: none;
 		box-shadow: none;
 	}
 }
@@ -237,7 +237,7 @@ body.theme-dark .rollwright-roll.rollwright-crit:not(.rollwright-error) {
 	.rollwright-roll.rollwright-rolled.rollwright-crit,
 	.rollwright-roll.rollwright-rolled.rollwright-fumble,
 	.rollwright-roll.rollwright-rolled .rollwright-stamp {
-		animation: none !important;
+		animation: none;
 	}
 }
 

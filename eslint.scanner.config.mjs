@@ -64,6 +64,23 @@ export default defineConfig([
   },
 
   {
+    // Aanbevelingen uit de echte keuring van 0.3.0 (community.obsidian.md, 8 nov 2026):
+    // geen promise aan een callback die niets terug verwacht, en elementen via createEl of
+    // createSpan in plaats van document.createElement. Hier nagebouwd zodat het lokaal opvalt.
+    files: ["src/**/*.{ts,cts,mts,tsx}"],
+    rules: {
+      "@typescript-eslint/no-misused-promises": ["error", { checksVoidReturn: true }],
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "CallExpression[callee.property.name='createElement']",
+          message: "Use createEl, createDiv or createSpan (Obsidian review of 0.3.0).",
+        },
+      ],
+    },
+  },
+
+  {
     // Scanner handles this separately. It must be switched off under the glob
     // the rule actually runs on -- manifest.json matches no source glob, so an
     // "off" in the block above would not reach it.

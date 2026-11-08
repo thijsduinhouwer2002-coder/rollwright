@@ -1,13 +1,17 @@
 # Changelog
 
-## Unreleased
+## 0.3.1
 
+- The two optional skins are redrawn so each one looks like its own thing. Parchment is old paper with ink and a red d20; a natural 20 is gold leaf with a red wax seal, a natural 1 gets a dark ink seal. Arcane is a night sky with a light rim; a natural 20 shows gold numbers on deep purple inside a golden aura.
+- Stickers such as NAT 20 sit a little higher, so they no longer touch the number.
 - A table or list in the same note can be rolled with `[[#^id]]`. The example note uses it, so its two table rolls keep working after you rename it (before, they said "Note not found").
 - A roll inside a table cell or list item now finds its links from the note that holds the table, as Obsidian does. This only matters when two notes in different folders share a name.
 - Roll log: a fixed value such as `dice: 7` shows 7 once, without a formula and working that repeat it.
 - Roll again on an older roll in the log rolls in the note it came from (with that note's frontmatter), as long as the note still exists; otherwise in the open note.
 - A crit or fumble copied from the note reads "20, NAT 20", not "20NAT 20".
 - A dice code inside a rolled section, paragraph or line (such as `dice: 1d6`) now shows as plain text, "1d6", instead of raw code. It still does not roll there, so a note can never keep rolling itself.
+- Clean-up after the first Obsidian review: settings callbacks no longer hand promises to Obsidian, elements are made with Obsidian's own helpers, the styles no longer use `!important`, and every release now comes with a build provenance attestation for main.js and styles.css.
+- The empty Roll log says "Open the example note" once that note exists, instead of offering to create it again.
 
 ## 0.3.0
 

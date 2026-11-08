@@ -36,7 +36,7 @@ class RollWidget extends WidgetType {
 	}
 
 	toDOM(view: EditorView): HTMLElement {
-		const span = activeDocument.createElement("span");
+		const span = createSpan();
 		const component = new Component();
 		component.load();
 		components.set(span, component);

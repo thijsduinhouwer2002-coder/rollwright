@@ -11,6 +11,9 @@ on:
 
 permissions:
   contents: write
+  # Voor de herkomstbewijzen (artifact attestations), aanbevolen in de keuring van Obsidian (8 nov 2026).
+  id-token: write
+  attestations: write
 
 jobs:
   bouwen:
@@ -26,13 +29,28 @@ jobs:
       - name: Versie lezen
         id: v
         run: echo "versie=$(node -p "require('./manifest.json').version")" >> "$GITHUB_OUTPUT"
-      - name: Release maken
+      - name: Bestaat de release al
+        id: r
         if: contains(github.event.head_commit.message, '[release]')
         env:
           GH_TOKEN: ${{ github.token }}
           V: ${{ steps.v.outputs.versie }}
         run: |
-          if gh release view "$V" >/dev/null 2>&1; then echo "release $V bestaat al, niets gedaan"; exit 0; fi
+          if gh release view "$V" >/dev/null 2>&1; then echo "nieuw=nee" >> "$GITHUB_OUTPUT"; echo "release $V bestaat al"; else echo "nieuw=ja" >> "$GITHUB_OUTPUT"; fi
+      - name: Herkomst van de bestanden bewijzen
+        if: steps.r.outputs.nieuw == 'ja'
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: |
+            main.js
+            styles.css
+          # Een plugin zonder styles.css haalt die regel hierboven weg.
+      - name: Release maken
+        if: steps.r.outputs.nieuw == 'ja'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          V: ${{ steps.v.outputs.versie }}
+        run: |
           FILES="main.js manifest.json"; [ -f styles.css ] && FILES="$FILES styles.css"
           NOTES=$(awk -v v="$V" '$0 ~ "^## .*"v {f=1;next} /^## /{if(f)exit} f' CHANGELOG.md 2>/dev/null)
           gh release create "$V" $FILES --title "$V" --notes "${NOTES:-Rollwright $V}"

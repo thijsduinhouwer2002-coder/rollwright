@@ -5,5 +5,5 @@ export default defineConfig({
 	resolve: {
 		alias: { obsidian: fileURLToPath(new URL("./tests/obsidian-stub.ts", import.meta.url)) },
 	},
-	test: { include: ["tests/**/*.test.ts", "tests/**/*.test.mjs"] },
+	test: { include: ["tests/**/*.test.ts", "tests/**/*.test.mjs"], setupFiles: ["tests/setup-globals.ts"] },
 });

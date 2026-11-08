@@ -20,7 +20,7 @@ export function quietNestedCodes(value: Element): void {
 		}
 		const formula = NESTED.exec(child.textContent ?? "")?.[1];
 		if (!formula) continue;
-		const span = child.ownerDocument.createElement("span");
+		const span = createSpan();
 		span.className = NESTED_CLASS;
 		span.textContent = formula;
 		child.replaceWith(span);

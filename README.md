@@ -4,7 +4,7 @@
 
 ![Rollwright: roll dice right in your notes](https://raw.githubusercontent.com/thijsduinhouwer2002-coder/rollwright/main/images/poster.png)
 
-Made by Thijs at [Dortus](https://dortus.com) for game masters and solo players who keep their sessions in Obsidian. It uses the `dice:` notation known from the Dice Roller plugin.
+Made by Thijs at [Dortus](https://dortus.com) for game masters and solo players who keep their sessions in Obsidian. It uses the `dice:` notation known from the Dice Roller plugin. All rolling is free. [Optional skins](#paid-skins) are a one-time purchase.
 
 ![Three clicks in a session note: the third roll is a natural 20 and lands in gold](https://raw.githubusercontent.com/thijsduinhouwer2002-coder/rollwright/main/images/demo.gif)
 
@@ -27,11 +27,9 @@ Made by Thijs at [Dortus](https://dortus.com) for game masters and solo players 
 
 For a table, give it a block id such as `^loot` and write `` `dice: [[Treasure^loot]]` ``.
 
-All rolling is free. Optional skins are a one-time purchase (see [Paid skins](#paid-skins)).
-
 ## Full reference
 
-Everything below is detail for when you need it. Rollwright is at version 0.3.0. Before each release, automated tests run it in the real Obsidian app, in reading view and Live Preview.
+Everything below is detail for when you need it. Rollwright is at version 0.3.1. Before each release, automated tests run it in the real Obsidian app, in reading view and Live Preview.
 
 ### Rolling dice
 
@@ -124,9 +122,9 @@ The number flags only change dice results, not picks from tables, lists or notes
 | `#tag\|link` | A link to one random note with the tag |
 | `2d#tag`, `#tag\|-\|paragraph,yaml` | Several picks, and block types |
 
-The forms `[[Note#^id]]` and `[text](Note#^id)` also work.
+The forms `[[Note#^id]]` and `[text](Note#^id)` also work. For a table in the same note, write `[[#^id]]`; that keeps working when you rename the note.
 
-A roll inside a block or section you draw is not rolled again: it shows as plain code. An embedded note in such a result becomes a link. Embedded images stay.
+A roll inside a block or section you draw is not rolled again: it shows as plain text, like 1d6. An embedded note in such a result becomes a link. Embedded images stay.
 
 #### Lookup tables
 
