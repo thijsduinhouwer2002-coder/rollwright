@@ -210,3 +210,6 @@ export const editorInfoField = {};
 export const editorLivePreviewField = {};
 export function setIcon(): void {}
 export function setTooltip(): void {}
+export function normalizePath(path: string): string {
+	return path.replace(/\/+/g, "/").replace(/^\/|\/$/g, "");
+}

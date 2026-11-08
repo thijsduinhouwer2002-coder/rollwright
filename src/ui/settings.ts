@@ -209,7 +209,7 @@ export class RollwrightSettingTab extends PluginSettingTab {
 						});
 					}),
 			},
-			{ name: "", build: (setting) => renderSkinPreview(setting.infoEl) },
+			{ name: "", build: (setting) => renderSkinPreview(setting.infoEl, this.plugin.isLicensed) },
 		];
 
 		if (!ready) {

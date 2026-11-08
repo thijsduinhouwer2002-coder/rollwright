@@ -1,4 +1,5 @@
 import { averageOf, defaultRandom, DiceError, formatNumber, formatResult, isNarrative, LIMITS, newBudget, roll, rollNarrative, type Budget, type RandomInt } from "../engine";
+import { extremeOf, stampText, type Extreme } from "./extreme";
 import { listItems, noteLines, parseBlocks, type Block } from "./markdown";
 import { parseSpec, withoutFlag, type Flags, type Spec } from "./spec";
 import { findColumn, findLookupRow, lookupFormula, parseTable, type Table } from "./table";
@@ -30,6 +31,10 @@ export interface RollOutcome {
 	estimated?: boolean;
 	/** The shown value is the average of |avg, so details holds no breakdown of dice. */
 	average?: boolean;
+	/** A real roll of dice that is the highest or lowest result its formula can give. Missing in results of 0.2.0 and older. */
+	extreme?: Extreme;
+	/** With extreme: "NAT 20", "NAT 1", "MAX" or "MIN", decided with the names filled in (see stampText). */
+	stamp?: string;
 	formula: string;
 	details: string;
 	flags: Flags;
@@ -251,7 +256,13 @@ async function rollSpecAt(raw: string, context: RollContext, depth: number, firs
 				return { kind: "dice", text: formatResult(average.value, spec.flags), total: average.value, estimated: !average.exact, average: true, formula: dice, details: average.exact ? "Average" : "Estimated average", flags: spec.flags };
 			}
 			const result = roll(dice, diceOptions(context));
-			return { kind: "dice", text: formatResult(result.total, spec.flags), total: result.total, formula: dice, details: result.breakdown, flags: spec.flags };
+			const outcome: RollOutcome = { kind: "dice", text: formatResult(result.total, spec.flags), total: result.total, formula: dice, details: result.breakdown, flags: spec.flags };
+			const extreme = extremeOf(result.total, dice, diceOptions(context));
+			if (extreme !== undefined) {
+				outcome.extreme = extreme;
+				outcome.stamp = stampText(dice, extreme, diceOptions(context));
+			}
+			return outcome;
 		} catch (error) {
 			// Ordinary notation always wins. Only a formula that fails there and consists of narrative dice alone is narrative.
 			if (!(error instanceof DiceError) || !isNarrative(dice)) throw error;

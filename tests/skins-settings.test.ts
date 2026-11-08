@@ -3,7 +3,7 @@ import RollwrightPlugin from "../src/main";
 import type { LicenseRequest, LicenseResponse, PolarIds } from "../src/pro/license";
 import { SKINS } from "../src/pro/skins";
 import { COMING_SOON, RollwrightSettingTab } from "../src/ui/settings";
-import { PREVIEW_RESULT } from "../src/ui/skin-preview";
+import { PREVIEW_CRIT, PREVIEW_RESULT, PREVIEW_STAMP } from "../src/ui/skin-preview";
 import { allText, apiVersion, buttons, settingsMade, type FakeEl } from "./obsidian-stub";
 
 const IDS: PolarIds = { organizationId: "org-1", benefitId: "ben-1", buyUrl: "https://buy.polar.sh/x" };
@@ -87,13 +87,48 @@ describe("the group Skins (Daan, points 3, 11 and 12)", () => {
 				SKINS.map((skin) => skin.cssClass),
 			);
 			for (const [index, tile] of tiles.entries()) {
-				expect(byClass(tile, "rollwright-roll")).toHaveLength(1);
-				expect(byClass(tile, "rollwright-icon")).toHaveLength(1);
-				expect(allText(tile)).toEqual([PREVIEW_RESULT, SKINS[index]!.name]);
+				// Klus 7 (Daan, ontwerp-v2): a crit with its stamp and a small ordinary roll, was one roll "17".
+				expect(byClass(tile, "rollwright-roll")).toHaveLength(2);
+				expect(byClass(tile, "rollwright-icon")).toHaveLength(2);
+				expect(allText(tile)).toEqual([PREVIEW_CRIT, PREVIEW_STAMP, PREVIEW_RESULT, SKINS[index]!.name]);
 			}
 			expect(SKINS.map((skin) => skin.name)).toEqual(["Classic", "Parchment", "Arcane"]);
 		},
 	);
+
+	it("every tile shows a crit like a real one: crit and roll-max classes, NAT 20 stamp, and a small ordinary roll", async () => {
+		const { tab } = await load(IDS);
+		tab.display();
+		for (const tile of byClass(skinRows()[1]!.infoEl, "rollwright-skin-preview-tile")) {
+			const [crit, plain] = byClass(tile, "rollwright-roll");
+			expect(crit!.cls).toEqual(expect.arrayContaining(["rollwright-crit", "rollwright-roll-max"]));
+			expect(byClass(crit!, "rollwright-stamp").map((el) => el.text)).toEqual([PREVIEW_STAMP]);
+			expect(byClass(crit!, "rollwright-value").map((el) => el.text)).toEqual([PREVIEW_CRIT]);
+			expect(plain!.cls).toContain("rollwright-skin-preview-small");
+			expect(plain!.cls).not.toContain("rollwright-crit");
+			expect(byClass(plain!, "rollwright-stamp")).toHaveLength(0);
+		}
+	});
+
+	it("without a key the paid skins carry a lock, Classic does not", async () => {
+		const { tab } = await load(IDS);
+		tab.display();
+		const tiles = byClass(skinRows()[1]!.infoEl, "rollwright-skin-preview-tile");
+		expect(tiles.map((tile) => byClass(tile, "rollwright-skin-preview-lock").length)).toEqual(SKINS.map((skin) => (skin.paid ? 1 : 0)));
+		expect(SKINS.map((skin) => skin.paid)).toEqual([false, true, true]);
+	});
+
+	it("with an active key no tile carries a lock", async () => {
+		const { plugin, tab } = await load(IDS);
+		plugin.settings.licenseKey = "KEY-1";
+		plugin.settings.licenseCheckedAt = START;
+		expect(plugin.isLicensed).toBe(true);
+		tab.display();
+		const preview = settingsMade.slice(settingsMade.map((s) => s.name).lastIndexOf("Skins") + 1)[1]!;
+		const tiles = byClass(preview.infoEl, "rollwright-skin-preview-tile");
+		expect(tiles).toHaveLength(3);
+		expect(tiles.flatMap((tile) => byClass(tile, "rollwright-skin-preview-lock"))).toHaveLength(0);
+	});
 
 	it("choosing still needs a key: without one the Skin list only has Classic", async () => {
 		const { tab } = await load(IDS);

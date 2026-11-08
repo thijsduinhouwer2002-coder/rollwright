@@ -1,10 +1,12 @@
 # Rollwright
 
-Roll dice and random tables right inside your notes. Write a formula, read the result, click to roll again.
+**Roll dice right in your notes.** Write `` `dice: 1d20 + 5` ``, read the result, click to roll again. A natural 20 lands in gold.
 
-![A session note in Live Preview: the Perception line shows the code you type, dice: 1d20 + 4|text(Perception), and the lines around it show rolled results: trap damage, an encounter, the weather, loot and a line from the toll keeper](https://raw.githubusercontent.com/thijsduinhouwer2002-coder/rollwright/main/images/live-preview.png)
+![Rollwright: roll dice right in your notes](https://raw.githubusercontent.com/thijsduinhouwer2002-coder/rollwright/main/images/poster.png)
 
 Made by Thijs at [Dortus](https://dortus.com) for game masters and solo players who keep their sessions in Obsidian. It uses the `dice:` notation known from the Dice Roller plugin.
+
+![Three clicks in a session note: the third roll is a natural 20 and lands in gold](https://raw.githubusercontent.com/thijsduinhouwer2002-coder/rollwright/main/images/demo.gif)
 
 ## What you can do
 
@@ -12,10 +14,10 @@ Made by Thijs at [Dortus](https://dortus.com) for game masters and solo players 
 - **Roll on your own notes.** Pick a random row from a table, an item from a list, a block from a note, a line, or a note with a tag.
 - **Lookup tables.** Put a formula in the first header and Rollwright picks the matching row. Cells can hold rolls too.
 - **Keep or write a result.** `dice+:` keeps a result after a restart, `dice-mod:` writes it into the note after you confirm.
-- **Roll history.** A side panel shows what you rolled, from which note, and lets you roll again.
+- **Roll log.** A side panel shows what you rolled, grouped by note and session, and lets you roll again.
 - **Works where you write.** Reading view and Live Preview look the same, in light and dark themes.
 
-![The roll history panel next to the note, with each roll, its formula or source table, and its source note](https://raw.githubusercontent.com/thijsduinhouwer2002-coder/rollwright/main/images/roll-history.png)
+![The roll log next to a session note: each roll with its dice, table or line, the time, and a button to roll it again](https://raw.githubusercontent.com/thijsduinhouwer2002-coder/rollwright/main/images/roll-log.jpg)
 
 ## Quick start
 
@@ -45,7 +47,7 @@ To write a roll into the note for good, use `` `dice-mod: 3d100 + 12` ``. It sho
 
 #### Clicks with Ctrl or Alt
 
-Ctrl-click (Cmd-click on a Mac) on a result from a table, list, section, line or tag opens the note it came from, in a new tab, without rolling. A tag roll over several notes has no single note to open, so it only says so. On a dice roll, Ctrl-click rolls again like a plain click. Alt-click (Option-click on a Mac) on a dice roll shows its average, as `|avg` does; it is not added to the history. Ctrl-click on a code with `|none` hides its result again and forgets it, also for `dice+:`. On `dice-mod:`, Ctrl-click opens the source of a table or section result; any other click opens the replace window. Phones have no Ctrl or Alt key, so there only a plain tap works.
+Ctrl-click (Cmd-click on a Mac) on a result from a table, list, section, line or tag opens the note it came from, in a new tab, without rolling. A tag roll over several notes has no single note to open, so it only says so. On a dice roll, Ctrl-click rolls again like a plain click. Alt-click (Option-click on a Mac) on a dice roll shows its average, as `|avg` does; it is not added to the roll log. Ctrl-click on a code with `|none` hides its result again and forgets it, also for `dice+:`. On `dice-mod:`, Ctrl-click opens the source of a table or section result; any other click opens the replace window. Phones have no Ctrl or Alt key, so there only a plain tap works.
 
 #### Dice notation
 
@@ -141,14 +143,16 @@ If the first header is a formula, Rollwright rolls it and finds the matching row
 
 ### Side panel, commands and settings
 
-- **Roll history** shows rolls you clicked or typed, with the source note, and lets you roll again. Rolls that happen by themselves when a note opens are not listed. The history is stored in the plugin's data file.
-- **Commands:** "Open roll history" and "Roll a formula".
+- **Roll log** shows rolls you clicked or typed, grouped under the note and the time the session began, and lets you roll again. Rolls that happen by themselves when a note opens are not listed. The log is stored in the plugin's data file.
+- **Commands:** "Open roll log" and "Roll a formula".
 - **Settings:** default die, default number of dice, whether `dice-mod:` keeps the formula, and saved formulas. A saved formula works by name in any roll, such as `` `dice: attack` `` or `1d6 + bonus`. A number in the frontmatter of the note works the same way: with `str: 3` in the note, `` `dice: 1d20 + str` `` adds 3. A saved formula with the same name goes first. Only the note's own frontmatter counts, also for a code inside a table or section drawn from another note; inline fields such as `str:: 3` and text that is not a number do not. Names that read as dice notation, such as `d`, `dh`, `k`, `s` or `F`, stay notation.
 - **Import:** a button copies named formulas from the data file of the Dice Roller plugin, if you have it. That file is only read. Existing names are kept. The layout of that file was not verified, so an import may find nothing.
 
 ## Paid skins
 
 **All rolling features are free. Two visual skins, Parchment and Arcane, are paid and need a license key.** The Classic skin is free.
+
+![The same session note in the three skins, Classic, Parchment and Arcane, in a dark and a light theme](https://raw.githubusercontent.com/thijsduinhouwer2002-coder/rollwright/main/images/skins.jpg)
 
 You buy the skins once through Polar: press Buy for $6 in the settings, pay, then paste the license key from your Polar purchases in the settings and press Activate. One key works on all your devices.
 

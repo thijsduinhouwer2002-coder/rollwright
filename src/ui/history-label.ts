@@ -49,3 +49,12 @@ export function historyLabel(formula: string): HistoryLabel {
 		return { name: "", formula: raw };
 	}
 }
+
+/**
+ * True when a logged result is one plain number ("17", "-2", "3.5"). Everything else, a table line, a
+ * list, a note or a block, shows as quiet text in the log (class rollwright-history-text, ronde 8 of
+ * Daan). Decided on the result itself, so entries saved by older versions get it too.
+ */
+export function isNumberResult(result: string): boolean {
+	return /^[+-]?\d+(?:[.,]\d+)?$/.test(result.trim());
+}

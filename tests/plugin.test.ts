@@ -65,7 +65,7 @@ describe("plugin glue, with a stand-in for the app", () => {
 		expect(registered.processors).toBe(1);
 		expect(registered.extensions).toBe(1);
 		expect(registered.tabs).toBe(1);
-		expect(registered.commands.map((c) => c.name)).toEqual(["Open roll history", "Roll a formula"]);
+		expect(registered.commands.map((c) => c.name)).toEqual(["Open roll log", "Create example note", "Roll a formula"]);
 	});
 
 	it("keeps a result in place until a fresh roll, and logs only fresh rolls with their source", async () => {

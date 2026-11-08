@@ -31,6 +31,12 @@
 	font-weight: var(--font-normal);
 }
 
+/* Live Preview: .cm-line has white-space: pre-wrap, so the space after "Hit:" stayed next to the gap of
+   the token and showed double ("Hit:  9"). With normal it falls away at the end of the item, as in reading. */
+.cm-line .rollwright-roll .rollwright-label {
+	white-space: normal;
+}
+
 .rollwright-value p {
 	display: inline;
 	margin: 0;
@@ -208,8 +214,34 @@ body.rollwright-skin-arcane .rollwright-roll:hover {
 }
 
 .rollwright-skin-preview-name {
+	display: flex;
+	align-items: center;
+	gap: 0.3em;
 	color: var(--text-muted);
 	font-size: var(--font-ui-smaller);
+}
+
+/* Klus 7 (Daan, ontwerp-v2): every tile shows a crit with its NAT 20 sticker and a small ordinary roll.
+   The padding keeps room for the sticker, which sits half outside the top right corner of the token. */
+.rollwright-skin-preview-rolls {
+	display: flex;
+	align-items: center;
+	gap: 1em;
+	padding: 0.8em 0.9em 0 0;
+}
+
+.rollwright-skin-preview-small {
+	font-size: 0.8em;
+}
+
+.rollwright-skin-preview-lock {
+	display: inline-flex;
+	color: var(--text-faint);
+}
+
+.rollwright-skin-preview-lock svg {
+	width: var(--icon-xs);
+	height: var(--icon-xs);
 }
 
 /* Side panel */
@@ -267,4 +299,896 @@ body.rollwright-skin-arcane .rollwright-roll:hover {
 	align-items: center;
 	flex-wrap: wrap;
 	gap: var(--size-4-2);
+}
+
+/* ==========================================================================================
+   Rollwright v2, voorstel van Daan (tak ontwerp/rollwright-v2, zie ontwerp-v2.md).
+   Eigen gezicht: een worp is een klein geëmailleerd speelstuk met een d20 als merkteken.
+   Alles leunt op de accentkleur en de kleuren van het thema, dus werkt in elk thema.
+   Bewegingen alleen na een klik (klasse rollwright-rolled), nooit bij openen.
+   ========================================================================================== */
+body {
+	--rw-d20: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linejoin='round' stroke-linecap='round'><path d='M12 2 21 7v10l-9 5-9-5V7z'/><path d='M12 8 16.6 15.6H7.4z'/><path d='M12 2v6M21 7l-4.4 8.6M3 7l4.4 8.6M3 17l4.4-1.4M21 17l-4.4-1.4M12 22l-4.6-6.4M12 22l4.6-6.4'/></svg>");
+	--rw-spark: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 0c.8 6.4 4.8 10.6 12 12-7.2 1.4-11.2 5.6-12 12-.8-6.4-4.8-10.6-12-12C7.2 10.6 11.2 6.4 12 0z'/></svg>");
+	--rw-shine: rgba(255, 255, 255, 0.55);
+	--rw-slow: 1;
+	--rw-hi: var(--color-yellow, #e0ac00);
+	--rw-lo: var(--color-red, #e93147);
+}
+
+body.theme-dark {
+	--rw-shine: rgba(255, 255, 255, 0.12);
+}
+
+.rollwright-roll:not(.rollwright-error) {
+	position: relative;
+	padding: 0.02em 0.5em 0.02em 0.38em;
+	border-radius: 0.6em;
+	border-color: color-mix(in srgb, var(--rollwright-accent) 40%, var(--rollwright-border));
+	background: linear-gradient(180deg,
+		color-mix(in srgb, var(--rollwright-accent) 20%, var(--rollwright-bg)),
+		color-mix(in srgb, var(--rollwright-accent) 8%, var(--rollwright-bg)));
+	box-shadow: inset 0 1px 0 var(--rw-shine), 0 1px 0 color-mix(in srgb, var(--rollwright-accent) 22%, transparent);
+	font-variant-numeric: tabular-nums;
+	transition: transform 120ms ease, box-shadow 160ms ease;
+}
+
+.rollwright-roll:not(.rollwright-error):hover {
+	transform: translateY(-1px);
+	box-shadow: inset 0 1px 0 var(--rw-shine), 0 3px 8px color-mix(in srgb, var(--rollwright-accent) 28%, transparent);
+}
+
+.rollwright-roll:not(.rollwright-error):active {
+	transform: translateY(0) scale(0.96);
+}
+
+/* Het merkteken: een d20 in plaats van het gewone Lucide-icoon. */
+.rollwright-roll .rollwright-icon svg {
+	display: none;
+}
+
+.rollwright-roll .rollwright-icon::before {
+	content: "";
+	display: block;
+	width: 1.05em;
+	height: 1.05em;
+	background: var(--rollwright-accent);
+	-webkit-mask: var(--rw-d20) center / contain no-repeat;
+	mask: var(--rw-d20) center / contain no-repeat;
+}
+
+.rollwright-roll .rollwright-value {
+	font-weight: var(--font-bold);
+}
+
+.rollwright-roll .rollwright-label {
+	opacity: 0.8;
+}
+
+/* Een blok (tabel, lijst, sectie): een kaart uit het spel, met een rand in de accentkleur links. */
+.rollwright-roll.rollwright-roll-block:not(.rollwright-error) {
+	background: color-mix(in srgb, var(--rollwright-accent) 7%, var(--rollwright-bg));
+	border-left: 3px solid var(--rollwright-accent);
+	border-radius: var(--radius-m);
+}
+
+.rollwright-roll.rollwright-roll-block .rollwright-value {
+	font-weight: var(--font-normal);
+}
+
+/* De worp rolt: de d20 tuimelt, het getal valt op zijn plek. */
+@keyframes rw-tumble {
+	0% { transform: rotate(-260deg) scale(0.5); opacity: 0.3; }
+	65% { transform: rotate(18deg) scale(1.2); opacity: 1; }
+	100% { transform: none; }
+}
+
+@keyframes rw-land {
+	0% { transform: translateY(-0.6em) scale(0.8); opacity: 0; filter: blur(2px); }
+	60% { transform: translateY(0.08em) scale(1.08); opacity: 1; filter: none; }
+	100% { transform: none; }
+}
+
+@keyframes rw-burst {
+	0% { transform: scale(0.4); opacity: 0.9; }
+	100% { transform: scale(2.6); opacity: 0; }
+}
+
+@keyframes rw-pop {
+	0%, 60% { transform: scale(0) rotate(-90deg); opacity: 0; }
+	80% { transform: scale(1.4) rotate(10deg); opacity: 1; }
+	100% { transform: none; }
+}
+
+@keyframes rw-shake {
+	0%, 100% { transform: none; }
+	20% { transform: translateX(-0.12em) rotate(-4deg); }
+	40% { transform: translateX(0.1em) rotate(3deg); }
+	60% { transform: translateX(-0.06em) rotate(-2deg); }
+	80% { transform: translateX(0.04em); }
+}
+
+.rollwright-rolled .rollwright-icon {
+	animation: rw-tumble calc(520ms * var(--rw-slow)) cubic-bezier(0.2, 0.8, 0.3, 1.2) both;
+}
+
+.rollwright-rolled:not(.rollwright-roll-block) .rollwright-value {
+	display: inline-block;
+	animation: rw-land calc(360ms * var(--rw-slow)) calc(140ms * var(--rw-slow)) cubic-bezier(0.2, 0.8, 0.3, 1.3) both;
+}
+
+/* Hoogst mogelijke worp: goud, een vonk en een korte ring die wegzwelt. */
+.rollwright-roll.rollwright-crit:not(.rollwright-error) {
+	border-color: color-mix(in srgb, var(--rw-hi) 75%, var(--rollwright-bg));
+	background: linear-gradient(180deg,
+		color-mix(in srgb, var(--rw-hi) 38%, var(--rollwright-bg)),
+		color-mix(in srgb, var(--rw-hi) 14%, var(--rollwright-bg)));
+	box-shadow: inset 0 1px 0 var(--rw-shine), 0 0 0 1px color-mix(in srgb, var(--rw-hi) 30%, transparent), 0 0 14px color-mix(in srgb, var(--rw-hi) 45%, transparent);
+}
+
+.rollwright-crit .rollwright-icon {
+	position: relative;
+}
+
+.rollwright-crit .rollwright-icon::before {
+	background: color-mix(in srgb, var(--rw-hi) 60%, var(--text-normal));
+}
+
+.rollwright-roll.rollwright-crit::after {
+	content: "";
+	position: absolute;
+	top: -0.45em;
+	right: -0.4em;
+	width: 0.8em;
+	height: 0.8em;
+	background: var(--rw-hi);
+	-webkit-mask: var(--rw-spark) center / contain no-repeat;
+	mask: var(--rw-spark) center / contain no-repeat;
+}
+
+/* De vonk komt pas als het getal geland is, zodat hij de crit niet verklapt. */
+.rollwright-rolled.rollwright-crit::after {
+	animation: rw-pop calc(900ms * var(--rw-slow)) ease-out both;
+}
+
+.rollwright-rolled.rollwright-crit .rollwright-icon::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: 50%;
+	border: 2px solid var(--rw-hi);
+	animation: rw-burst calc(700ms * var(--rw-slow)) calc(300ms * var(--rw-slow)) ease-out both;
+}
+
+/* Laagst mogelijke worp: rood getint, de d20 dof, het getal schudt even. */
+.rollwright-roll.rollwright-fumble:not(.rollwright-error) {
+	border-color: color-mix(in srgb, var(--rw-lo) 60%, var(--rollwright-bg));
+	background: linear-gradient(180deg,
+		color-mix(in srgb, var(--rw-lo) 22%, var(--rollwright-bg)),
+		color-mix(in srgb, var(--rw-lo) 9%, var(--rollwright-bg)));
+}
+
+.rollwright-fumble .rollwright-icon::before {
+	background: color-mix(in srgb, var(--rw-lo) 70%, var(--text-normal));
+}
+
+.rollwright-rolled.rollwright-fumble:not(.rollwright-roll-block) .rollwright-value {
+	animation: rw-land calc(300ms * var(--rw-slow)) calc(140ms * var(--rw-slow)) ease-out both, rw-shake calc(420ms * var(--rw-slow)) calc(460ms * var(--rw-slow)) ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.rollwright-rolled .rollwright-icon,
+	.rollwright-rolled .rollwright-value,
+	.rollwright-rolled .rollwright-icon::after {
+		animation: none !important;
+	}
+}
+
+/* Geschiedenis als logboek van het spel: een spoor met een d20 per worp, nieuwste bovenaan. */
+.rollwright-history-list {
+	position: relative;
+	padding-left: 1.7em;
+}
+
+.rollwright-history-list::before {
+	content: "";
+	position: absolute;
+	left: 0.6em;
+	top: 0.9em;
+	bottom: 0.9em;
+	width: 2px;
+	border-radius: 2px;
+	background: linear-gradient(180deg, color-mix(in srgb, var(--rollwright-accent) 55%, transparent), var(--background-modifier-border));
+}
+
+.rollwright-history-item {
+	position: relative;
+	display: grid;
+	grid-template-columns: auto 1fr;
+	column-gap: 0.6em;
+	align-items: baseline;
+	margin-bottom: var(--size-4-2);
+	padding: var(--size-4-2) var(--size-4-3);
+	border: 1px solid var(--background-modifier-border);
+	border-top: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-m);
+	background: var(--background-primary);
+	overflow-wrap: anywhere;
+}
+
+.rollwright-history-item::before {
+	content: "";
+	position: absolute;
+	left: -1.55em;
+	top: 0.75em;
+	width: 1.05em;
+	height: 1.05em;
+	background: var(--rollwright-accent);
+	-webkit-mask: var(--rw-d20) center / contain no-repeat;
+	mask: var(--rw-d20) center / contain no-repeat;
+}
+
+.rollwright-history-item.rollwright-history-latest {
+	border-color: color-mix(in srgb, var(--rollwright-accent) 50%, var(--background-modifier-border));
+	box-shadow: 0 2px 10px color-mix(in srgb, var(--rollwright-accent) 14%, transparent);
+}
+
+.rollwright-history-item.rollwright-history-latest::before {
+	width: 1.3em;
+	height: 1.3em;
+	left: -1.68em;
+	top: 0.65em;
+}
+
+.rollwright-history-name {
+	grid-column: 1 / -1;
+	grid-row: 1;
+	padding-right: 2em;
+	font-size: var(--font-ui-smaller);
+	font-weight: var(--font-semibold);
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: color-mix(in srgb, var(--rollwright-accent) 65%, var(--text-normal));
+}
+
+.rollwright-history-result {
+	font-size: 1.35em;
+	line-height: 1.25;
+	font-weight: var(--font-bold);
+	font-variant-numeric: tabular-nums;
+}
+
+.rollwright-history-result {
+	grid-column: 1;
+	grid-row: 2;
+}
+
+.rollwright-history-formula {
+	grid-column: 3;
+	grid-row: 2;
+}
+
+/* Drie kolommen: getal, stempel (leeg zonder crit of fumble), formule. Zonder kolomafstand, zodat
+   een lege stempelkolom geen extra ruimte geeft; de formule houdt zelf zijn 0.6em afstand. */
+.rollwright-history-item {
+	grid-template-columns: auto auto 1fr;
+	column-gap: 0;
+}
+
+.rollwright-history-formula {
+	margin-left: 0.6em;
+}
+
+.rollwright-history-details {
+	grid-column: 1 / -1;
+	grid-row: 3;
+}
+
+.rollwright-history-meta {
+	grid-column: 1 / -1;
+	grid-row: 4;
+}
+
+.rollwright-history-meta {
+	margin-top: 0.15em;
+}
+
+/* Opnieuw rollen rechtsboven op de kaart, niet op een eigen regel. */
+.rollwright-history-meta .clickable-icon {
+	position: absolute;
+	top: var(--size-4-1);
+	right: var(--size-4-1);
+}
+
+/* Wissen is geen hoofdactie: klein en rustig rechts. */
+button.rollwright-history-clear:not(.clickable-icon) {
+	display: block;
+	margin-left: auto;
+	background: transparent;
+	box-shadow: none;
+	color: var(--text-faint);
+	font-size: var(--font-ui-smaller);
+}
+
+/* Klus 5: een kopje per sessie (notitie en uur). Eenvoudig; Daan maakt het mooi. */
+.rollwright-history-group-title {
+	margin: var(--size-4-3) 0 var(--size-4-2) -1.7em;
+	font-size: var(--font-ui-smaller);
+	font-variant: small-caps;
+	letter-spacing: 0.04em;
+	color: var(--text-muted);
+}
+
+/* Klus 5b en 9c: het kopje is de link naar de notitie (de kaarten noemen hem niet meer). Rustig, pas bij
+   wijzen of met het toetsenbord zie je dat het een link is. */
+.rollwright-history-group-title.rollwright-history-note {
+	cursor: pointer;
+	border-radius: var(--radius-s);
+}
+
+.rollwright-history-group-title.rollwright-history-note:hover,
+.rollwright-history-group-title.rollwright-history-note:focus-visible {
+	color: var(--text-accent);
+	text-decoration: underline;
+}
+
+.rollwright-history-group-title.rollwright-history-note:focus-visible {
+	outline: 2px solid var(--interactive-accent);
+	outline-offset: 2px;
+}
+
+/* De verloop-achtergrond van v2 zet background-color op doorzichtig. Daaronder de skinkleur, zodat
+   de achtergrondkleur van het vakje die van de skin blijft (e2e skins); zichtbaar verandert er niets,
+   het verloop dekt hem helemaal. */
+.rollwright-roll:not(.rollwright-error),
+.rollwright-roll.rollwright-crit:not(.rollwright-error),
+.rollwright-roll.rollwright-fumble:not(.rollwright-error) {
+	background-color: var(--rollwright-bg);
+}
+
+/* Stempel bij crit en fumble (klus 3b): "NAT 20" / "NAT 1", bij andere formules "MAX" / "MIN".
+   Leest ook zonder kleur. Komt pas na het landen van het getal, net als de vonk. */
+.rollwright-stamp {
+	display: inline-block;
+	margin-left: 0.4em;
+	padding: 0 0.35em;
+	border-radius: 0.35em;
+	font-size: 0.68em;
+	line-height: 1.5;
+	font-weight: var(--font-bold);
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	vertical-align: 0.15em;
+	white-space: nowrap;
+}
+
+.rollwright-crit .rollwright-stamp {
+	color: color-mix(in srgb, var(--rw-hi) 55%, var(--text-normal));
+	background: color-mix(in srgb, var(--rw-hi) 22%, transparent);
+}
+
+.rollwright-fumble .rollwright-stamp {
+	color: color-mix(in srgb, var(--rw-lo) 70%, var(--text-normal));
+	background: color-mix(in srgb, var(--rw-lo) 14%, transparent);
+}
+
+/* De stempel staat in het logboek naast het getal, niet erin (dan is het getal alleen het getal).
+   Even groot en even hoog als toen hij in het getal stond: 0.5 van 1.35em, 0.35em omhoog. */
+.rollwright-history-item > .rollwright-stamp {
+	grid-column: 2;
+	grid-row: 2;
+	justify-self: start;
+	position: relative;
+	top: -0.35em;
+	margin-left: 0.4em;
+	font-size: 0.675em;
+}
+
+/* Alleen voor schermlezers: de komma tussen getal en stempel. */
+.rollwright-history-sep {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+.rollwright-rolled .rollwright-stamp {
+	animation: rw-land calc(300ms * var(--rw-slow)) calc(480ms * var(--rw-slow)) ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.rollwright-rolled .rollwright-stamp,
+	.rollwright-rolled.rollwright-crit::after {
+		animation: none !important;
+	}
+}
+
+/* Doortellen na een klik (ontwerp-v2 punt 2.1, klus 4). De echte uitkomst blijft als tekst staan en
+   houdt de ruimte vast; het getelde getal ligt er bovenop, dus niets eromheen schuift. */
+.rollwright-value[data-rollwright-tick] {
+	position: relative;
+	-webkit-text-fill-color: transparent;
+}
+
+.rollwright-value[data-rollwright-tick]::after {
+	content: attr(data-rollwright-tick);
+	position: absolute;
+	left: 50%;
+	top: 0;
+	transform: translateX(-50%);
+	white-space: nowrap;
+	-webkit-text-fill-color: currentColor;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.rollwright-value[data-rollwright-tick] {
+		-webkit-text-fill-color: currentColor;
+	}
+
+	.rollwright-value[data-rollwright-tick]::after {
+		content: none;
+	}
+}
+
+/* ==========================================================================================
+   Rollwright v2, ronde 2 (Daan, 8 nov, tak ontwerp/rollwright-v2b). Punten van de controleur:
+   warmer goud in donker, eigen goud en rood per skin, een ring die je ziet, tabeluitkomsten
+   rustiger dan een worp, crit en fumble ook in het logboek, de nieuwste worp duidelijker.
+   ========================================================================================== */
+
+/* Donker: --color-yellow is daar olijfachtig; met wat oranje erin wordt het warm goud. */
+body.theme-dark {
+	--rw-hi: color-mix(in srgb, var(--color-yellow, #e0ac00) 70%, var(--color-orange, #ec7500));
+}
+
+/* Per skin een eigen goud en rood dat op de eigen achtergrond van die skin leest.
+   Alleen op het vakje, want het logboek staat op de achtergrond van het thema. */
+body.rollwright-skin-parchment .rollwright-roll,
+.rollwright-skin-preview-tile.rollwright-skin-parchment .rollwright-roll {
+	--rw-hi: #b07800;
+	--rw-lo: #a3261a;
+}
+
+body.theme-dark.rollwright-skin-parchment .rollwright-roll,
+body.theme-dark .rollwright-skin-preview-tile.rollwright-skin-parchment .rollwright-roll {
+	--rw-hi: #f2c14e;
+	--rw-lo: #ff7a64;
+}
+
+body.rollwright-skin-arcane .rollwright-roll,
+.rollwright-skin-preview-tile.rollwright-skin-arcane .rollwright-roll {
+	--rw-hi: #ffd45e;
+	--rw-lo: #ff6f8a;
+	--rw-shine: rgba(255, 255, 255, 0.14);
+}
+
+/* In het vakje mengen met de letterkleur van de skin, niet met die van het thema
+   (anders donker op donker in Arcane bij een licht thema). */
+.rollwright-roll.rollwright-crit .rollwright-icon::before {
+	background: color-mix(in srgb, var(--rw-hi) 70%, var(--rollwright-fg));
+}
+
+.rollwright-roll.rollwright-fumble .rollwright-icon::before {
+	background: color-mix(in srgb, var(--rw-lo) 75%, var(--rollwright-fg));
+}
+
+.rollwright-roll.rollwright-crit .rollwright-stamp {
+	color: color-mix(in srgb, var(--rw-hi) 55%, var(--rollwright-fg));
+	background: color-mix(in srgb, var(--rw-hi) 24%, transparent);
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rw-hi) 45%, transparent);
+}
+
+.rollwright-roll.rollwright-fumble .rollwright-stamp {
+	color: color-mix(in srgb, var(--rw-lo) 70%, var(--rollwright-fg));
+	background: color-mix(in srgb, var(--rw-lo) 16%, transparent);
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rw-lo) 35%, transparent);
+}
+
+/* De ring: niet meer een cirkeltje om de d20, maar een golf om het hele token die wegzwelt,
+   en daarna een zachte gloed die even nagloeit. */
+@keyframes rw-wave {
+	0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--rw-hi) 75%, transparent); }
+	100% { box-shadow: 0 0 0 0.75em color-mix(in srgb, var(--rw-hi) 0%, transparent); }
+}
+
+.rollwright-roll.rollwright-rolled.rollwright-crit::before {
+	content: "";
+	position: absolute;
+	inset: -1px;
+	border-radius: inherit;
+	pointer-events: none;
+	animation: rw-wave calc(750ms * var(--rw-slow)) calc(380ms * var(--rw-slow)) ease-out both;
+}
+
+.rollwright-rolled.rollwright-crit .rollwright-icon::after {
+	border-width: 3px;
+}
+
+.rollwright-roll.rollwright-crit::after {
+	width: 0.95em;
+	height: 0.95em;
+	top: -0.55em;
+	right: -0.45em;
+	filter: drop-shadow(0 0 3px color-mix(in srgb, var(--rw-hi) 70%, transparent));
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.rollwright-roll.rollwright-rolled.rollwright-crit::before {
+		animation: none !important;
+		box-shadow: none;
+	}
+}
+
+/* Tabellen en lijsten: tekst, geen getal. Rustiger dan een worp: niet vet, geen verloop,
+   wel het merkteken, zodat je ziet dat je erop kunt klikken. */
+.rollwright-roll.rollwright-text:not(.rollwright-error):not(.rollwright-roll-block) {
+	background: color-mix(in srgb, var(--rollwright-accent) 6%, var(--rollwright-bg));
+	box-shadow: none;
+	font-weight: var(--font-normal);
+}
+
+.rollwright-roll.rollwright-text .rollwright-value {
+	font-weight: var(--font-normal);
+}
+
+.rollwright-roll.rollwright-text .rollwright-icon::before {
+	opacity: 0.75;
+}
+
+/* Logboek: crit en fumble zie je ook hier, met dezelfde kleuren als in de tekst. */
+.rollwright-history-item.rollwright-crit {
+	border-color: color-mix(in srgb, var(--rw-hi) 65%, var(--background-modifier-border));
+	background: linear-gradient(180deg, color-mix(in srgb, var(--rw-hi) 12%, var(--background-primary)), var(--background-primary) 70%);
+}
+
+.rollwright-history-item.rollwright-crit::before {
+	background: var(--rw-hi);
+	filter: drop-shadow(0 0 4px color-mix(in srgb, var(--rw-hi) 60%, transparent));
+}
+
+.rollwright-history-item.rollwright-fumble {
+	border-color: color-mix(in srgb, var(--rw-lo) 50%, var(--background-modifier-border));
+	background: linear-gradient(180deg, color-mix(in srgb, var(--rw-lo) 8%, var(--background-primary)), var(--background-primary) 70%);
+}
+
+.rollwright-history-item.rollwright-fumble::before {
+	background: var(--rw-lo);
+}
+
+.rollwright-history-item .rollwright-stamp {
+	vertical-align: 0.35em;
+}
+
+/* De nieuwste worp: een duidelijk grotere d20 met een gloed, zodat je ziet waar het verslag begint. */
+.rollwright-history-item.rollwright-history-latest::before {
+	width: 1.55em;
+	height: 1.55em;
+	left: -1.8em;
+	top: 0.55em;
+	filter: drop-shadow(0 0 4px color-mix(in srgb, var(--rollwright-accent) 55%, transparent));
+}
+
+/* Het moment van de crit (ronde 4, na de controleur): geen grijze fase meer (die verklapte juist de
+   crit), maar een klap als het getal landt: het token springt even op en de golf gaat wijd.
+   Dat goud en rood pas bij het landen komen, regelt de code (klus 2d: klasse na ±480 ms). */
+@keyframes rw-punch {
+	0% { transform: scale(1); }
+	35% { transform: scale(1.16) rotate(-2deg); }
+	65% { transform: scale(0.97) rotate(1deg); }
+	100% { transform: none; }
+}
+
+@keyframes rw-thud {
+	0% { transform: none; }
+	30% { transform: translateY(0.12em) scale(0.95); }
+	100% { transform: none; }
+}
+
+.rollwright-roll.rollwright-rolled.rollwright-crit:not(.rollwright-error) {
+	animation: rw-punch calc(420ms * var(--rw-slow)) calc(460ms * var(--rw-slow)) cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+.rollwright-roll.rollwright-rolled.rollwright-fumble:not(.rollwright-error) {
+	animation: rw-thud calc(360ms * var(--rw-slow)) calc(460ms * var(--rw-slow)) ease-out both;
+}
+
+@keyframes rw-wave-wide {
+	0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--rw-hi) 85%, transparent), 0 0 0 0 color-mix(in srgb, var(--rw-hi) 50%, transparent); }
+	100% { box-shadow: 0 0 0 1.1em color-mix(in srgb, var(--rw-hi) 0%, transparent), 0 0 1.6em 0.6em color-mix(in srgb, var(--rw-hi) 0%, transparent); }
+}
+
+.rollwright-roll.rollwright-rolled.rollwright-crit::before {
+	animation: rw-wave-wide calc(800ms * var(--rw-slow)) calc(480ms * var(--rw-slow)) ease-out both;
+}
+
+/* Rijker goud en rood: meer kleur in het verloop, vooral in donker (was khaki). */
+.rollwright-roll.rollwright-crit:not(.rollwright-error) {
+	background: linear-gradient(180deg,
+		color-mix(in srgb, var(--rw-hi) 52%, var(--rollwright-bg)),
+		color-mix(in srgb, var(--rw-hi) 22%, var(--rollwright-bg)));
+	border-color: var(--rw-hi);
+}
+
+body.theme-dark .rollwright-roll.rollwright-crit:not(.rollwright-error) {
+	background: linear-gradient(180deg,
+		color-mix(in srgb, var(--rw-hi) 62%, var(--rollwright-bg)),
+		color-mix(in srgb, var(--rw-hi) 30%, var(--rollwright-bg)));
+	color: color-mix(in srgb, var(--rw-hi) 25%, #fff);
+}
+
+.rollwright-roll.rollwright-fumble:not(.rollwright-error) {
+	border-color: color-mix(in srgb, var(--rw-lo) 80%, var(--rollwright-bg));
+}
+
+/* De stempel houdt geen plek vrij terwijl het getal nog rolt: hij groeit pas uit het niets. */
+@keyframes rw-stamp {
+	0% { font-size: 0; padding: 0; margin-left: 0; opacity: 0; }
+	1% { font-size: 0.68em; padding: 0 0.35em; margin-left: 0.4em; opacity: 0; transform: scale(1.8); }
+	100% { opacity: 1; transform: none; }
+}
+
+.rollwright-roll.rollwright-rolled .rollwright-stamp {
+	animation: rw-stamp calc(260ms * var(--rw-slow)) calc(500ms * var(--rw-slow)) cubic-bezier(0.3, 1.5, 0.5, 1) both;
+}
+
+/* Logboek: naam en d20 in de kleur van de kaart, niet paars op goud of rood. */
+.rollwright-history-item.rollwright-crit .rollwright-history-name {
+	color: color-mix(in srgb, var(--rw-hi) 60%, var(--text-normal));
+}
+
+.rollwright-history-item.rollwright-fumble .rollwright-history-name {
+	color: color-mix(in srgb, var(--rw-lo) 70%, var(--text-normal));
+}
+
+.rollwright-history-item.rollwright-crit {
+	background: linear-gradient(180deg, color-mix(in srgb, var(--rw-hi) 20%, var(--background-primary)), var(--background-primary) 80%);
+	box-shadow: 0 2px 12px color-mix(in srgb, var(--rw-hi) 22%, transparent);
+}
+
+.rollwright-history-item.rollwright-history-latest.rollwright-crit::before {
+	filter: drop-shadow(0 0 6px color-mix(in srgb, var(--rw-hi) 80%, transparent));
+}
+
+.rollwright-history-item.rollwright-history-latest.rollwright-fumble::before {
+	filter: drop-shadow(0 0 5px color-mix(in srgb, var(--rw-lo) 60%, transparent));
+}
+
+.rollwright-history-item.rollwright-history-latest:not(.rollwright-crit):not(.rollwright-fumble)::before {
+	filter: drop-shadow(0 0 6px color-mix(in srgb, var(--rollwright-accent) 80%, transparent));
+}
+
+/* Tabeluitkomsten: ook geen rand rondom en geen pil, alleen een stippellijn eronder en het teken. */
+.rollwright-roll.rollwright-text:not(.rollwright-error):not(.rollwright-roll-block) {
+	border-color: transparent;
+	border-bottom: 1px dashed color-mix(in srgb, var(--rollwright-accent) 55%, transparent);
+	border-radius: 0.3em;
+	background: color-mix(in srgb, var(--rollwright-accent) 5%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.rollwright-roll.rollwright-rolled.rollwright-crit,
+	.rollwright-roll.rollwright-rolled.rollwright-fumble,
+	.rollwright-roll.rollwright-rolled .rollwright-stamp {
+		animation: none !important;
+	}
+}
+
+/* Klus 2d (bouwer, 8 nov): de code zet crit en fumble pas als het getal landt (±460 ms na de klik,
+   src/ui/motion.ts). Een animatie-vertraging telt vanaf het moment dat de klasse komt, dus de
+   vertragingen hierboven (die rekenden vanaf de klik) zouden de klap pas na ±920 ms geven. Daarom
+   beginnen klap, dreun, golf, ring en schudden direct met de klasse. De stempel komt met de nieuwe
+   uitkomst in beeld en houdt zijn eigen vertraging van 500 ms: dan is het goud er al. */
+.rollwright-roll.rollwright-rolled.rollwright-crit:not(.rollwright-error),
+.rollwright-roll.rollwright-rolled.rollwright-fumble:not(.rollwright-error),
+.rollwright-roll.rollwright-rolled.rollwright-crit::before,
+.rollwright-rolled.rollwright-crit .rollwright-icon::after {
+	animation-delay: 0s;
+}
+
+.rollwright-rolled.rollwright-fumble:not(.rollwright-roll-block) .rollwright-value {
+	animation-delay: calc(140ms * var(--rw-slow)), 0s;
+}
+
+/* Het rijkere verloop van ronde 4 zet background-color weer op doorzichtig; daaronder opnieuw de
+   skinkleur (zie het blok van f1214b8), zodat de e2e skins ook bij een gegooide 6 of 1 klopt. */
+.rollwright-roll.rollwright-crit:not(.rollwright-error),
+body.theme-dark .rollwright-roll.rollwright-crit:not(.rollwright-error) {
+	background-color: var(--rollwright-bg);
+}
+
+/* Ronde 7 (Daan, 8 nov): de stempel in de tekst wordt een sticker op de rechterbovenhoek van het
+   token. Hij staat los van de regel (position: absolute), dus het token wordt bij het landen niet
+   breder en de regel springt niet meer (ronde 6, v2-47 tegen v2-48). Volle kleur met een randje in
+   de kleur van de pagina, iets scheef: het leest als een sticker die erop geplakt wordt.
+   In het logboek blijft de stempel naast het getal staan (die regels gelden alleen voor het token). */
+.rollwright-roll {
+	position: relative;
+}
+
+.rollwright-roll > .rollwright-stamp,
+.rollwright-roll.rollwright-crit > .rollwright-stamp,
+.rollwright-roll.rollwright-fumble > .rollwright-stamp {
+	position: absolute;
+	top: -0.95em;
+	right: -1.2em;
+	z-index: 1;
+	margin: 0;
+	padding: 0.06em 0.38em 0.02em;
+	border: 0.12em solid var(--background-primary);
+	border-radius: 0.4em;
+	font-size: 0.6em;
+	line-height: 1.3;
+	letter-spacing: 0.06em;
+	vertical-align: baseline;
+	transform: rotate(8deg);
+	pointer-events: none;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
+}
+
+.rollwright-roll.rollwright-crit > .rollwright-stamp {
+	color: #3a2a00;
+	background: var(--rw-hi);
+}
+
+.rollwright-roll.rollwright-fumble > .rollwright-stamp {
+	color: #fff;
+	background: color-mix(in srgb, var(--rw-lo) 88%, #000);
+}
+
+/* Geplakt, niet gegroeid: hij komt groot en schuin aan en slaat neer op zijn plek. Zelfde moment
+   als vroeger (500 ms na de klik, als goud of rood er al is), maar zonder iets op te schuiven. */
+@keyframes rw-sticker {
+	0% { opacity: 0; transform: scale(2.4) rotate(-14deg); }
+	55% { opacity: 1; transform: scale(0.9) rotate(10deg); }
+	100% { opacity: 1; transform: scale(1) rotate(8deg); }
+}
+
+.rollwright-roll.rollwright-rolled > .rollwright-stamp {
+	animation: rw-sticker calc(300ms * var(--rw-slow)) calc(500ms * var(--rw-slow)) cubic-bezier(0.3, 1.4, 0.5, 1) both;
+}
+
+/* De vonk van de crit stond ook rechtsboven; nu de sticker daar zit, zit de vonk op de d20 links. */
+.rollwright-roll.rollwright-crit::after {
+	right: auto;
+	left: -0.45em;
+}
+
+/* Ronde 7b: op ware grootte (logboek-licht, run 42438770074) dekte de sticker de bovenkant van het
+   getal af; hij staat nu hoger en verder naar rechts, half buiten het token.
+   Ronde 7c (controleur): tekst 0.6em zodat NAT 20 op ware grootte leest, en nog iets hoger, want in
+   donkere thema's (Border, Minimal) raakte hij de bovenkant van de 20 nog. */
+
+/* De klap groeit vanuit links, zodat het token het woord ervoor niet afdekt (ronde 6, v2-25). */
+.rollwright-roll.rollwright-rolled.rollwright-crit:not(.rollwright-error),
+.rollwright-roll.rollwright-rolled.rollwright-fumble:not(.rollwright-error) {
+	transform-origin: left center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.rollwright-roll.rollwright-rolled > .rollwright-stamp {
+		animation: none !important;
+	}
+}
+
+/* Ronde 8 (Daan, 8 nov): drie dingen uit de echte Obsidian (run 42442820040).
+   1. Een tabeluitkomst in het logboek ("A dwarf counting her coins twice") stond groot en vet in de
+      eerste kolom, en de formule ernaast werd een kolom van één letter breed (r8-12). Vangnet: de
+      uitkomst krijgt hoogstens 70% van de breedte, de formule altijd minstens 6em. Met de klasse
+      rollwright-history-text (klus 9, Olaf) wordt tekst rustig en staat de bron eronder (stijl v9). */
+.rollwright-history-item {
+	grid-template-columns: fit-content(70%) auto minmax(6em, 1fr);
+}
+
+.rollwright-history-item.rollwright-history-text .rollwright-history-result {
+	grid-column: 1 / -1;
+	padding-right: 1.8em;
+	font-size: var(--font-ui-medium);
+	font-weight: var(--font-medium);
+	line-height: 1.35;
+	font-variant-numeric: normal;
+}
+
+.rollwright-history-item.rollwright-history-text .rollwright-history-formula {
+	grid-column: 1 / -1;
+	grid-row: 3;
+	margin-left: 0;
+}
+
+.rollwright-history-item.rollwright-history-text .rollwright-history-details {
+	grid-row: 4;
+}
+
+.rollwright-history-item.rollwright-history-text .rollwright-history-meta {
+	grid-row: 5;
+}
+
+/* 2. Het lege logboek is de eerste minuut: een groot d20-teken, één zin, de knop eronder, in het midden.
+      Niet meer een losse grijze zin met een knop die eraan vastplakt (r8-01). */
+.rollwright-history-empty {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--size-4-3);
+	margin-top: var(--size-4-6);
+	padding: var(--size-4-6) var(--size-4-4);
+	border: 1px dashed color-mix(in srgb, var(--rollwright-accent) 35%, var(--background-modifier-border));
+	border-radius: var(--radius-l);
+	background: color-mix(in srgb, var(--rollwright-accent) 5%, transparent);
+	text-align: center;
+	line-height: 1.45;
+}
+
+.rollwright-history-empty::before {
+	content: "";
+	width: 2.6em;
+	height: 2.6em;
+	background: var(--rollwright-accent);
+	-webkit-mask: var(--rw-d20) center / contain no-repeat;
+	mask: var(--rw-d20) center / contain no-repeat;
+}
+
+.rollwright-history-empty .rollwright-history-try {
+	margin-top: var(--size-4-1);
+}
+
+/* 3. Skin-tegels: alle drie toonden groot dezelfde gouden crit, dus je zag niet wat je koopt (r8-17).
+      Nu staat de gewone worp groot voorop, in de kleuren van de skin; de crit klein ernaast. */
+.rollwright-skin-preview-tile {
+	min-width: 8.5em;
+	padding: var(--size-4-3) var(--size-4-4) var(--size-4-2);
+}
+
+.rollwright-skin-preview-rolls .rollwright-skin-preview-small {
+	order: 1;
+	font-size: 1.15em;
+}
+
+.rollwright-skin-preview-rolls .rollwright-roll.rollwright-crit {
+	order: 2;
+	font-size: 1em;
+}
+
+/* Ronde 8b: in de tegel dekte de sticker de bovenkant van de 20 (r8-17, run 42443312533); hier staat
+   hij hoger en verder naar rechts, met ruimte in de tegel. */
+.rollwright-skin-preview-rolls {
+	padding: 1.1em 1.3em 0 0;
+}
+
+.rollwright-skin-preview-rolls .rollwright-roll > .rollwright-stamp {
+	top: -1.35em;
+	right: -1.7em;
+}
+
+/* Ronde 8c: de tegels waren op ware grootte klein en de derde viel op een tweede rij (run 42443792945).
+   Drie even brede kolommen over de hele breedte, de worpen groter. */
+.rollwright-skin-preview {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(10em, 1fr));
+}
+
+.rollwright-skin-preview-tile {
+	min-width: 0;
+	font-size: 1.12em;
+}
+
+.rollwright-skin-preview-rolls {
+	gap: 0.7em;
+}
+
+.rollwright-skin-preview-tile .rollwright-skin-preview-name {
+	font-size: var(--font-ui-small);
+}
+
+/* Ronde 9 (Daan): een tabeluitkomst heeft geen eigen vlak meer, dus de letter komt van het thema,
+   niet van de skin. Anders licht op wit bij Arcane in een licht thema (GEZIEN run 42447322873). */
+.rollwright-roll.rollwright-text:not(.rollwright-error):not(.rollwright-roll-block) .rollwright-value,
+.rollwright-roll.rollwright-text:not(.rollwright-error):not(.rollwright-roll-block) {
+	color: var(--text-normal);
+}
+
+/* Ronde 9b: de zin in het lege logboek verdeeld over twee even lange regels, geen los "here." */
+.rollwright-history-empty {
+	text-wrap: balance;
 }
