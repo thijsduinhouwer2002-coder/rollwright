@@ -53,6 +53,8 @@ export const Keymap = {
 
 export class ItemView {}
 export class MarkdownView {}
+/** The root of a pop-out window. */
+export class WorkspaceWindow {}
 export class PluginSettingTab {
 	containerEl = { empty: () => {} };
 	/** How often update() was called; from Obsidian 1.13 on that redraws a tab built from definitions. */

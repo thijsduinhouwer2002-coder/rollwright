@@ -11,6 +11,7 @@ import { rollSpec, type NoteData, type RollContext, type RollOutcome } from "./r
 import { showExampleNote } from "./ui/example-note";
 import { CHANGED_NOTICE, NOT_MARKDOWN_NOTICE, ReplaceCodeModal } from "./ui/dice-mod";
 import { HISTORY_VIEW, RollHistoryView } from "./ui/history-view";
+import { NoteWorld } from "./ui/note-world";
 import { rollwrightLivePreview } from "./ui/live-preview";
 import { RollFormulaModal } from "./ui/modal";
 import { processReadingView } from "./ui/reading-view";
@@ -29,6 +30,8 @@ export default class RollwrightPlugin extends Plugin {
 	/** Results of `dice+:`, written to disk with the settings. */
 	private readonly kept = new Map<string, RollOutcome>();
 	private readonly skinnedDocuments = new Set<Document>();
+	/** The world of a paid skin on whole notes (ui/note-world.ts). */
+	readonly noteWorld = new NoteWorld(this);
 	/** The network call, the clock and our Polar ids; tests put in their own. */
 	licenseRequest: RequestFunction = obsidianRequest;
 	now: () => number = () => Date.now();
@@ -67,10 +70,24 @@ export default class RollwrightPlugin extends Plugin {
 			});
 			this.applySkin();
 			void this.recheckLicense();
+			this.watchNoteWorld();
 		});
 	}
 
+	/** Looks again whenever another note opens, the layout changes or a note is saved. */
+	private watchNoteWorld(): void {
+		const { workspace, metadataCache } = this.app;
+		const refresh = (): void => this.noteWorld.refresh();
+		this.registerEvent(workspace.on("layout-change", refresh));
+		this.registerEvent(workspace.on("active-leaf-change", refresh));
+		this.registerEvent(workspace.on("file-open", refresh));
+		// Some stand-in apps of the unit tests have no metadata cache with events; the real app always has.
+		const cache = metadataCache as Partial<typeof metadataCache> | undefined;
+		if (cache?.on) this.registerEvent(metadataCache.on("changed", (file, data) => this.noteWorld.noteChanged(file, data)));
+	}
+
 	onunload(): void {
+		this.noteWorld.clear();
 		for (const doc of this.skinnedDocuments) {
 			for (const skin of SKINS) doc.body.removeClass(skin.cssClass);
 		}
@@ -121,6 +138,7 @@ export default class RollwrightPlugin extends Plugin {
 		for (const known of this.skinnedDocuments) {
 			for (const skin of SKINS) known.body.toggleClass(skin.cssClass, skin.id === active.id);
 		}
+		this.noteWorld.refresh();
 	}
 
 	/** Builds the bridge between the pure rollers and this vault. */

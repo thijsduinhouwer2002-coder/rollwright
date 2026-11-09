@@ -20,3 +20,10 @@ const delen = readdirSync(dir).filter((f) => f.endsWith(".css")).sort();
 if (delen.length === 0) throw new Error(`geen delen in ${dir}, styles.css niet gebouwd`);
 writeFileSync("styles.css", delen.map((f) => readFileSync(`${dir}/${f}`, "utf8")).join(""));
 console.log(`styles.css gebouwd uit ${delen.length} delen`);
+
+// Iedereen laadt styles.css, ook gratis gebruikers; de letters van de skins staan er als base64 in.
+// Harde grens 500 KB (bouwplan notitiesfeer, punt 6): daarboven faalt de build.
+const STYLES_LIMIT = 500 * 1024;
+const stylesSize = readFileSync("styles.css").length;
+if (stylesSize > STYLES_LIMIT) throw new Error(`styles.css is ${stylesSize} bytes, meer dan de grens van ${STYLES_LIMIT}`);
+console.log(`styles.css: ${(stylesSize / 1024).toFixed(1)} KB van de ${STYLES_LIMIT / 1024} KB`);

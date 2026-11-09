@@ -148,46 +148,6 @@ body.rollwright-skin-classic,
 	--rollwright-accent: var(--interactive-accent);
 }
 
-/* Paid skins */
-body.rollwright-skin-parchment,
-.rollwright-skin-preview-tile.rollwright-skin-parchment {
-	--rollwright-bg: #efe2c0;
-	--rollwright-fg: #3f2d17;
-	--rollwright-border: #b89b63;
-	--rollwright-accent: #8c2f1b;
-}
-
-body.rollwright-skin-parchment .rollwright-roll,
-.rollwright-skin-preview-tile.rollwright-skin-parchment .rollwright-roll {
-	font-family: Georgia, "Times New Roman", serif;
-}
-
-/* Parchment in a dark theme: dark parchment instead of a bright beige sticker (Daan point 5). */
-body.theme-dark.rollwright-skin-parchment,
-body.theme-dark .rollwright-skin-preview-tile.rollwright-skin-parchment {
-	--rollwright-bg: #3a2f1e;
-	--rollwright-fg: #f0e2c0;
-	--rollwright-border: #8a6d3b;
-	--rollwright-accent: #e0a060;
-}
-
-/* An error looks the same in every skin: the normal font, not the serif of Parchment (Daan point 8). */
-body.rollwright-skin-parchment .rollwright-roll.rollwright-error {
-	font-family: inherit;
-}
-
-body.rollwright-skin-arcane,
-.rollwright-skin-preview-tile.rollwright-skin-arcane {
-	--rollwright-bg: #1f1838;
-	--rollwright-fg: #e9e2ff;
-	--rollwright-border: #6a4fc9;
-	--rollwright-accent: #5fd6e8;
-}
-
-body.rollwright-skin-arcane .rollwright-roll:hover {
-	box-shadow: 0 0 0.4em var(--rollwright-accent);
-}
-
 /* Skin preview in the settings: every tile carries the class of its skin, so it looks like that skin
    whatever skin the body has. */
 .rollwright-skin-preview {
@@ -209,14 +169,10 @@ body.rollwright-skin-arcane .rollwright-roll:hover {
 	background: var(--background-primary);
 }
 
-/* The preview only shows: no hover, no pointer, and the serif font of Parchment stays on its own tile. */
+/* The preview only shows: no hover, no pointer. */
 .rollwright-skin-preview-tile .rollwright-skin-preview-roll {
 	cursor: default;
 	pointer-events: none;
-}
-
-.rollwright-skin-preview-tile:not(.rollwright-skin-parchment) .rollwright-roll {
-	font-family: inherit;
 }
 
 .rollwright-skin-preview-name {

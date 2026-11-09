@@ -90,9 +90,16 @@ describe("the group Skins (Daan, points 3, 11 and 12)", () => {
 				// Klus 7 (Daan, ontwerp-v2): a crit with its stamp and a small ordinary roll, was one roll "17".
 				expect(byClass(tile, "rollwright-roll")).toHaveLength(2);
 				expect(byClass(tile, "rollwright-icon")).toHaveLength(2);
-				expect(allText(tile)).toEqual([PREVIEW_CRIT, PREVIEW_STAMP, PREVIEW_RESULT, SKINS[index]!.name]);
+				// Notitiesfeer stap 2 (Daan, 9 nov): a paid tile adds one line on what it does to the note.
+				const skin = SKINS[index]!;
+				expect(allText(tile)).toEqual([PREVIEW_CRIT, PREVIEW_STAMP, PREVIEW_RESULT, skin.name, ...(skin.tagline ? [skin.tagline] : [])]);
 			}
 			expect(SKINS.map((skin) => skin.name)).toEqual(["Classic", "Parchment", "Arcane"]);
+			expect(SKINS.map((skin) => skin.tagline)).toEqual([
+				undefined,
+				"Turns the whole note into old parchment",
+				"Turns the whole note into a torch-lit dungeon",
+			]);
 		},
 	);
 

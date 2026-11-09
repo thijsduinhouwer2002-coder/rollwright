@@ -32,6 +32,8 @@ export interface RollwrightSettings {
 	keptResults: [string, RollOutcome][];
 	/** Write the formula before the result when a `dice-mod:` code is replaced. */
 	diceModFormula: boolean;
+	/** Which notes a paid skin also skins as a whole: "rolls", "all" or "off" (see ui/note-world.ts). */
+	noteWorld: string;
 }
 
 export const DEFAULT_SETTINGS: RollwrightSettings = {
@@ -44,6 +46,7 @@ export const DEFAULT_SETTINGS: RollwrightSettings = {
 	skin: "classic",
 	keptResults: [],
 	diceModFormula: true,
+	noteWorld: "rolls",
 };
 
 export const HISTORY_LIMIT = 200;

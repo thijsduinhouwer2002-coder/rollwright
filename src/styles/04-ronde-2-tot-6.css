@@ -9,27 +9,6 @@ body.theme-dark {
 	--rw-hi: color-mix(in srgb, var(--color-yellow, #e0ac00) 70%, var(--color-orange, #ec7500));
 }
 
-/* Per skin een eigen goud en rood dat op de eigen achtergrond van die skin leest.
-   Alleen op het vakje, want het logboek staat op de achtergrond van het thema. */
-body.rollwright-skin-parchment .rollwright-roll,
-.rollwright-skin-preview-tile.rollwright-skin-parchment .rollwright-roll {
-	--rw-hi: #b07800;
-	--rw-lo: #a3261a;
-}
-
-body.theme-dark.rollwright-skin-parchment .rollwright-roll,
-body.theme-dark .rollwright-skin-preview-tile.rollwright-skin-parchment .rollwright-roll {
-	--rw-hi: #f2c14e;
-	--rw-lo: #ff7a64;
-}
-
-body.rollwright-skin-arcane .rollwright-roll,
-.rollwright-skin-preview-tile.rollwright-skin-arcane .rollwright-roll {
-	--rw-hi: #ffd45e;
-	--rw-lo: #ff6f8a;
-	--rw-shine: rgba(255, 255, 255, 0.14);
-}
-
 /* In het vakje mengen met de letterkleur van de skin, niet met die van het thema
    (anders donker op donker in Arcane bij een licht thema). */
 .rollwright-roll.rollwright-crit .rollwright-icon::before {

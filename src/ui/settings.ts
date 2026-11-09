@@ -2,6 +2,7 @@ import { PluginSettingTab, requireApiVersion, Setting, type App, type SettingDef
 import type RollwrightPlugin from "../main";
 import { LICENSE_MESSAGES, paymentReady, PRICE_TEXT } from "../pro/license";
 import { availableSkins, SKINS } from "../pro/skins";
+import { NOTE_WORLD_MODES, noteWorldMode, WORLD_OFF, WORLD_ON } from "./note-world";
 import { renderSkinPreview } from "./skin-preview";
 
 /** A whole number of at least min, or null for anything else, an empty field included. */
@@ -200,6 +201,24 @@ export class RollwrightSettingTab extends PluginSettingTab {
 		];
 	}
 
+	/** Which notes a paid skin skins as a whole. Per note, cssclasses wins (see ui/note-world.ts). */
+	private noteWorldRow(): SettingRow {
+		const settings = this.plugin.settings;
+		return {
+			name: "Skin the note too",
+			desc: `A paid skin also changes the page, letters and colors of these notes, nothing outside them. Per note: add ${WORLD_ON} or ${WORLD_OFF} to the cssclasses property.`,
+			build: (setting) =>
+				void setting.addDropdown((dropdown) => {
+					for (const mode of NOTE_WORLD_MODES) dropdown.addOption(mode.id, mode.name);
+					dropdown.setValue(noteWorldMode(settings.noteWorld)).onChange(later(async (value) => {
+						settings.noteWorld = noteWorldMode(value);
+						await this.plugin.saveSettings();
+						this.plugin.noteWorld.refresh();
+					}));
+				}),
+		};
+	}
+
 	/** The skin choice with a preview of every skin, then Buy and the key field with Activate only when payment is ready. */
 	private skinRows(): SettingRow[] {
 		const settings = this.plugin.settings;
@@ -221,6 +240,8 @@ export class RollwrightSettingTab extends PluginSettingTab {
 			},
 			{ name: "", build: (setting) => renderSkinPreview(setting.infoEl, this.plugin.isLicensed) },
 		];
+		// Like the paid skins in the Skin list, this only shows with a valid key.
+		if (this.plugin.isLicensed) rows.push(this.noteWorldRow());
 
 		if (!ready) {
 			rows.push({ name: "License key", desc: COMING_SOON });

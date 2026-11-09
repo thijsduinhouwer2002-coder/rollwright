@@ -1,7 +1,7 @@
 {
   "id": "rollwright",
   "name": "Rollwright",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "minAppVersion": "1.7.2",
   "description": "Roll dice right in your notes with a full formula notation. Click to roll again. A natural 20 lands in gold. Draw from tables, lists, sections and tags, and keep your rolls in a Roll log.",
   "author": "Dortus",

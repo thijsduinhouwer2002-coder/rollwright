@@ -11,7 +11,7 @@ export const PREVIEW_RESULT = "17";
 /**
  * Three tiles side by side, one per skin, each with a crit and a small ordinary roll in the real look
  * of that skin, and its name under it. A paid skin that is not unlocked gets a small lock next to its
- * name. Shown with or without a key; it only shows, choosing stays in the Skin row.
+ * name. A paid tile also says in one line what the skin does to the note. Shown with or without a key; it only shows, choosing stays in the Skin row.
  */
 export function renderSkinPreview(parent: HTMLElement, licensed: boolean): void {
 	const preview = parent.createDiv({ cls: "rollwright-skin-preview" });
@@ -30,5 +30,6 @@ export function renderSkinPreview(parent: HTMLElement, licensed: boolean): void 
 			const lock = name.createSpan({ cls: "rollwright-skin-preview-lock", attr: { "aria-label": "Paid skin, needs a license key" } });
 			setIcon(lock, "lock");
 		}
+		if (skin.tagline) tile.createDiv({ cls: "rollwright-skin-preview-tagline", text: skin.tagline });
 	}
 }
