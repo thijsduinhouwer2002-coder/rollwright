@@ -130,9 +130,13 @@
 	background: transparent;
 	border: 0;
 	font-weight: var(--font-normal);
-	text-decoration-line: underline;
-	text-decoration-style: wavy;
-	text-decoration-color: var(--text-error);
+	border-bottom: 1px dotted var(--text-error);
+	border-radius: 0;
+	padding: 0;
+}
+
+.rollwright-error:hover {
+	border-bottom-color: var(--text-error);
 }
 
 /* Free skin */

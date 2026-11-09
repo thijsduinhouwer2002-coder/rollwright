@@ -130,9 +130,13 @@
 	background: transparent;
 	border: 0;
 	font-weight: var(--font-normal);
-	text-decoration-line: underline;
-	text-decoration-style: wavy;
-	text-decoration-color: var(--text-error);
+	border-bottom: 1px dotted var(--text-error);
+	border-radius: 0;
+	padding: 0;
+}
+
+.rollwright-error:hover {
+	border-bottom-color: var(--text-error);
 }
 
 /* Free skin */
@@ -1639,8 +1643,9 @@ body.theme-dark :is(body.rollwright-skin-classic .rollwright-roll:not(.rollwrigh
 	animation: rw-classic-in calc(200ms * var(--rw-slow)) calc(60ms * var(--rw-slow)) ease-out both;
 }
 
+/* Daan kan-punt 1 (8 nov): de stempel pas na het doortellen (dat landt op 460 ms, LAND_MS; 20 ms speling zoals de stempel in 03), anders staat er even "NAT 20" boven een 1. */
 :is(body.rollwright-skin-classic .rollwright-roll:not(.rollwright-skin-preview-roll), .rollwright-skin-preview-tile.rollwright-skin-classic .rollwright-roll).rollwright-rolled > .rollwright-stamp {
-	animation: rw-classic-fade calc(160ms * var(--rw-slow)) ease-out both;
+	animation: rw-classic-fade calc(160ms * var(--rw-slow)) calc(480ms * var(--rw-slow)) ease-out both;
 }
 
 /* Roll log bij Classic: goud en rood als rand en kleur, zonder verloop, schaduw of gloed. */

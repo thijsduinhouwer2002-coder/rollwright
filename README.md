@@ -6,7 +6,9 @@
 
 Made by Thijs at [Dortus](https://dortus.com) for game masters and solo players who keep their sessions in Obsidian. It uses the `dice:` notation known from the Dice Roller plugin. All rolling is free. [Optional skins](#paid-skins) are a one-time purchase.
 
-![Three clicks in a session note: the third roll is a natural 20 and lands in gold](https://raw.githubusercontent.com/thijsduinhouwer2002-coder/rollwright/main/images/demo.gif)
+![Real plugin footage in a session note: a natural 20 lands in gold, a natural 1 in red, every throw goes to the session log, then the optional Parchment and Arcane skins. The parchment note style is a custom CSS snippet, not part of the plugin](https://raw.githubusercontent.com/thijsduinhouwer2002-coder/rollwright/main/images/demo.gif)
+
+<sub>Real plugin footage. The parchment note style in the video is a custom CSS snippet, not part of the plugin; Parchment and Arcane are optional paid skins.</sub>
 
 ## What you can do
 
@@ -29,7 +31,7 @@ For a table, give it a block id such as `^loot` and write `` `dice: [[Treasure^l
 
 ## Full reference
 
-Everything below is detail for when you need it. Rollwright is at version 0.3.2. Before each release, automated tests run it in the real Obsidian app, in reading view and Live Preview.
+Everything below is detail for when you need it. Rollwright is at version 0.3.3. Before each release, automated tests run it in the real Obsidian app, in reading view and Live Preview.
 
 ### Rolling dice
 
