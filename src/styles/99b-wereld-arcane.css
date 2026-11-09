@@ -49,8 +49,8 @@ body.rollwright-skin-arcane .rollwright-roll:not(.rollwright-skin-preview-roll):
   radial-gradient(ellipse at 50% 50%, rgba(255,60,20,.28), transparent 70%), linear-gradient(180deg,#26292a,#0f1111);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 0 14px rgba(255,50,20,.45); text-shadow: 0 0 8px rgba(255,40,20,.8); }
 body.rollwright-skin-arcane .rollwright-roll:not(.rollwright-skin-preview-roll):not(.rollwright-error) .rollwright-stamp { font-family: "RW Uncial", serif; background: #1b1d1d; color: #ffb36a; border: 1px solid #ff8a3a; border-radius: 1px; }
-body.rollwright-skin-arcane .rollwright-world .view-header { background: #0d0f0f !important; border-bottom: 1px solid #2a2e2d !important; }
-body.rollwright-skin-arcane .rollwright-world .view-header-title, body.rollwright-skin-arcane .rollwright-world .view-header-title-parent, body.rollwright-skin-arcane .rollwright-world .view-header-breadcrumb { color: #ffb36a !important; }
+body.rollwright-skin-arcane .rollwright-world:not(#rw-a):not(#rw-b) .view-header { background: #0d0f0f; border-bottom: 1px solid #2a2e2d; }
+body.rollwright-skin-arcane .rollwright-world:not(#rw-a):not(#rw-b) .view-header-title, body.rollwright-skin-arcane .rollwright-world:not(#rw-a):not(#rw-b) .view-header-title-parent, body.rollwright-skin-arcane .rollwright-world:not(#rw-a):not(#rw-b) .view-header-breadcrumb { color: #ffb36a; }
 body.rollwright-skin-arcane .rollwright-world .metadata-container { --font-interface: "RW Spectral", Georgia, serif; font-family: "RW Spectral", Georgia, serif; color: #d7dcd6; }
 body.rollwright-skin-arcane .rollwright-world .metadata-property-key { color: #8f9a93; }
 /* Arcane: geen ijsblauwe of paarse resten van skins v2 meer op de tokens. */

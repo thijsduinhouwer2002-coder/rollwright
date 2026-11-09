@@ -1,6 +1,6 @@
 {
   "name": "rollwright",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "Dice notation, random tables and roll history for your notes.",
   "private": true,
   "license": "MIT",

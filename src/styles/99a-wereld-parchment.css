@@ -42,9 +42,9 @@ body.rollwright-skin-parchment .rollwright-world .callout { --callout-color: 122
 body.rollwright-skin-parchment .rollwright-world .callout-title { font-family: "RW Cinzel", serif; font-variant: small-caps; letter-spacing: .05em; font-size: .95em; color: #7a3b1f; }
 body.rollwright-skin-parchment .rollwright-world .callout-icon { color: #7a3b1f; }
 body.rollwright-skin-parchment .rollwright-world .rollwright-roll:not(.rollwright-skin-preview-roll):not(.rollwright-error) { font-family: "RW Cinzel", serif; }
-/* Titelbalk: een regel van het thema won; daarom hier de sterke markering, alleen binnen de wereld. */
-body.rollwright-skin-parchment .rollwright-world .view-header { background: #dcc595 !important; border-bottom: 1px solid #b89a6c !important; }
-body.rollwright-skin-parchment .rollwright-world .view-header-title, body.rollwright-skin-parchment .rollwright-world .view-header-title-parent, body.rollwright-skin-parchment .rollwright-world .view-header-breadcrumb { color: #4a1f0e !important; }
+/* Titelbalk: een regel van het thema won; daarom een sterkere kiezer (elke :not(#...) telt als een ID). */
+body.rollwright-skin-parchment .rollwright-world:not(#rw-a):not(#rw-b) .view-header { background: #dcc595; border-bottom: 1px solid #b89a6c; }
+body.rollwright-skin-parchment .rollwright-world:not(#rw-a):not(#rw-b) .view-header-title, body.rollwright-skin-parchment .rollwright-world:not(#rw-a):not(#rw-b) .view-header-title-parent, body.rollwright-skin-parchment .rollwright-world:not(#rw-a):not(#rw-b) .view-header-breadcrumb { color: #4a1f0e; }
 body.rollwright-skin-parchment .rollwright-world .metadata-container { --font-interface: "RW Fell", Georgia, serif; font-family: "RW Fell", Georgia, serif; color: #2e1d10; }
 body.rollwright-skin-parchment .rollwright-world .metadata-property-key { font-variant: small-caps; letter-spacing: .04em; color: #6b4f35; }
 /* ===== Roll log, Parchment: een kroniek op perkament, inkt en lakzegel ===== */
@@ -111,8 +111,8 @@ body.rollwright-skin-parchment .rollwright-roll:not(.rollwright-skin-preview-rol
 .rollwright-skin-preview-tile.rollwright-skin-parchment .rollwright-skin-preview-name { font-family: "RW Cinzel", serif; letter-spacing: .06em; color: #4a1f0e; }
 /* Parchment-log: ook de tijd in Cinzel (IM Fell schreef 08:40 als o8:4o). */
 body.rollwright-skin-parchment .rollwright-history .rollwright-history-time { font-family: "RW Cinzel", serif; font-style: normal; font-size: .8em; letter-spacing: .03em; }
-/* ===== Beweging Parchment (Hofcodex): zegeldruk, de pen schrijft het getal; NAT 20 randen en bladgoudglans; NAT 1 een inktvlek ===== */
-@keyframes rwp-pen { 0% { clip-path: inset(-20% 100% -20% 0); } 100% { clip-path: inset(-20% -10% -20% 0); } }
+/* ===== Beweging Parchment (Hofcodex): zegeldruk, de inkt van het getal vloeit van links in (keuring 0.3.4); NAT 20 randen en bladgoudglans; NAT 1 een inktvlek ===== */
+@keyframes rwp-pen { 0% { opacity: 0; transform: translateX(-.22em); } 60% { opacity: 1; } 100% { opacity: 1; transform: none; } }
 @keyframes rwp-druk { 0% { transform: translateY(-3px) scale(1.05); } 45% { transform: translateY(1px) scale(.985); } 100% { transform: none; } }
 @keyframes rwp-randen { 0% { box-shadow: 0 0 0 0 #f6ead0, 0 0 0 0 #7a3b1f, 0 0 0 0 #f6ead0, 0 0 0 0 #a8231a; }
   45% { box-shadow: 0 0 0 2px #f6ead0, 0 0 0 3px #7a3b1f, 0 0 0 3px #f6ead0, 0 0 0 3px #a8231a; }
@@ -146,3 +146,5 @@ body.rollwright-skin-parchment, .rollwright-skin-preview-tile.rollwright-skin-pa
 body.rollwright-skin-parchment .rollwright-world { --rollwright-bg: rgba(122,59,31,.08); --rollwright-fg: #2e1d10; --rollwright-border: #c8ab7c; --rollwright-accent: #7a3b1f; }
 /* Tabeluitkomst op het papieren token: altijd inkt, ook buiten de wereld in een donker thema (anders licht op papier, GEZIEN run 42609255916). */
 body.rollwright-skin-parchment .rollwright-roll.rollwright-text:not(.rollwright-error):not(.rollwright-roll-block), body.rollwright-skin-parchment .rollwright-roll.rollwright-text:not(.rollwright-error):not(.rollwright-roll-block) .rollwright-value { color: #2e1d10; }
+/* NAT 20: de ringen lopen 6px buiten het token; ruimte zodat ze het woord ervoor niet raken. */
+body.rollwright-skin-parchment .rollwright-roll:not(.rollwright-skin-preview-roll):not(.rollwright-error).rollwright-crit { margin-inline: 6px; }

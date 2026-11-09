@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.5
+
+- Fixes from the Obsidian community review of 0.3.4: the paid skins no longer use `!important` or `clip-path` in their CSS. Nothing changes in how they look.
+- In Parchment, the rings around a natural 20 no longer touch the word before or after it; the token has a little more room on both sides.
+
 ## 0.3.4
 
 - The paid skins now change the whole note, not only the dice. With Parchment a note with rolls becomes old parchment: paper, ink, old letters, a red wax seal on a natural 20. With Arcane it becomes a torch-lit dungeon of dark stone. Only the note and the Roll log change; the rest of Obsidian keeps your theme. The free Classic skin is unchanged.
